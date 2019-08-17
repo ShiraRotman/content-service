@@ -1,0 +1,24 @@
+{
+  "name": "greenpress-content-api",
+  "version": "1.0.0",
+  "description": "API for greenpress project",
+  "keywords": [],
+  "engines": {
+    "npm": ">=3",
+    "node": ">=6.5"
+  },
+  "scripts": {
+    "start": "node --use_strict index.js"
+  },
+  "author": "David Meir-Levy",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.4",
+    "express": "^4.15.3",
+    "mongoose": "^4.10.4",
+    "morgan": "^1.9.0",
+    "shortid": "^2.2.14"
+  }
+}
