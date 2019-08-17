@@ -22,3 +22,8 @@ $ npm install
 ```sh
 $ npm start
 ```
+
+## Future development
+- populate author of post.
+- tags resource api: list of tags, posts by tags.
+
