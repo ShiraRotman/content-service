@@ -50,7 +50,6 @@ function createCategory(req, res) {
 		.catch(() => res.status(400).jsonp({message: 'category creation failed'}).end());
 }
 
-
 function updateCategory(req, res) {
 	const body = req.body || {};
 	const category = req.category;
@@ -71,7 +70,6 @@ function updateCategory(req, res) {
 		})
 		.catch(() => res.status(400).jsonp({message: 'category update failed'}).end());
 }
-
 
 function removeCategory(req, res) {
 	const category = req.category;
