@@ -10,10 +10,12 @@ module.exports = (req, res, next) => {
 	}
 
 	return callInternalService(SERVICES.auth, {
-		headers: req.headers,
+		headers: {
+			authorization: req.headers.authorization,
+		},
 		url: '/api/me',
 	})
-		.then(axiosRes => axiosRes.json())
+		.then(axiosRes => axiosRes.data)
 		.then(user => {
 			req.user = user;
 			return next();

@@ -81,9 +81,9 @@ function createPost(req, res) {
 			if (!post) {
 				return Promise.reject(null);
 			}
-			return res.status(200).jsonp({...post, category: body.category}).end();
+			return res.status(200).jsonp({...post.toObject(), category: body.category}).end();
 		})
-		.catch(() => res.status(400).jsonp({message: 'post creation failed'}).end());
+		.catch((err) => res.status(400).jsonp({message: err || 'post creation failed'}).end());
 }
 
 function updatePost(req, res) {
