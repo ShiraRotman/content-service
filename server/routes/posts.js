@@ -12,7 +12,10 @@ function getCategoryIdByPath(path) {
 function getDisplayPost(post, category) {
 	return {
 		...post.toObject(),
-		category: category.path,
+		category: {
+			name: category.name,
+			path: category.path
+		},
 	}
 }
 
