@@ -1,12 +1,21 @@
 const Post = require('mongoose').model('Post');
 const Category = require('mongoose').model('Category');
 
+const LIMIT = 30;
+const MAX_LIMIT = 300;
+
 function getCategoryIdByPath(path) {
 	return Category
 		.findOne({path})
 		.select('_id')
 		.lean()
 		.then(cat => cat ? cat._id : null);
+}
+
+function getCategoryFromRequest(req) {
+	return Promise.resolve(req.category)
+		.then(category => category ? category._id : null)
+		.then(categoryId => categoryId || (req.query.category && getCategoryIdByPath(req.query.category)))
 }
 
 function getDisplayPost(post, category) {
@@ -32,12 +41,14 @@ function getPostByPath(req, res, next) {
 }
 
 function getPostsList(req, res) {
-	const query = req.query && typeof req.query.isPublic !== 'undefined' ?
-		{isPublic: req.query.isPublic === 'true'} : {};
+	const reqQuery = req.query || {};
+	const query = typeof reqQuery.isPublic !== 'undefined' ?
+		{isPublic: reqQuery.isPublic === 'true'} : {};
 
-	return Promise.resolve(req.category)
-		.then(category => category ? category._id : null)
-		.then(categoryId => categoryId || (req.query.category && getCategoryIdByPath(req.query.category)))
+	const limit = parseInt(reqQuery.limit) || LIMIT;
+	const offset = parseInt(reqQuery.offset) || 0;
+
+	return getCategoryFromRequest(req)
 		.then(categoryId => {
 			if (categoryId) {
 				query.category = categoryId;
@@ -48,6 +59,8 @@ function getPostsList(req, res) {
 			Post.find(query)
 				.sort({created: -1})
 				.populate('category', 'path')
+				.limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
+				.skip(offset)
 				.lean()
 		)
 		.then(list => {
