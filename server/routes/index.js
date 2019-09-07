@@ -49,7 +49,7 @@ function routes(app) {
 
 	// menus routes
 	app
-		.get('/api/menus', getMenusList)
+		.get('/api/menus', authCheck, editorCheck, getMenusList) // only admin can get ALL menus names
 		.post('/api/menus', authCheck, editorCheck, createMenu)
 		.get('/api/menus/:menuName', getMenuByName, getMenu)
 		.put('/api/menus/:menuName', authCheck, editorCheck, getMenuByName, updateMenu)
