@@ -57,6 +57,7 @@ function getPostsList(req, res) {
 		})
 		.then(query =>
 			Post.find(query)
+				.select('-content')
 				.sort({created: -1})
 				.populate('category', 'path')
 				.limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
