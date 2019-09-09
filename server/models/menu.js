@@ -9,10 +9,11 @@ const MenuSchema = new mongoose.Schema({
 	links: [{
 		kind: {
 			type: String,
-			enum: ['category', 'post'],
+			enum: ['category', 'post', 'http'],
 		},
 		category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category'},
 		post: {type: mongoose.Schema.Types.ObjectId, ref: 'Post'},
+		value: String,
 	}],
 });
 
