@@ -35,7 +35,7 @@ Promise.all([
 		await (new Post({
 			category: newCategory._id,
 			isPublic: true,
-			author: [],
+			authors: [],
 			title: 'Welcome to your new blog',
 			short: 'This is the first and demo post.<br>I hope you will enjoy this platform',
 			content: `<p>
