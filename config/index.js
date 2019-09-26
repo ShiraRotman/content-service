@@ -1,6 +1,5 @@
 const editorsRoles = process.env.EDITORS_ROLES ? process.env.EDITORS_ROLES.split(',') : ['editor', 'admin'];
 
-
 module.exports = {
 	mongoUri: process.env.MONGO_URI || "mongodb://localhost/auth-service",
 	authService: {
