@@ -1,23 +1,16 @@
-const callAuthService = require('../../helpers/call-auth-service')
-
-/**
- *  The Auth Checker middleware function.
- */
-module.exports = (req, res, next) => {
-  if (!req.headers.authorization) {
-    return res.status(401).end()
+function onlyAuthenticated (req, res) {
+  if (!req.user) {
+    return res.status(401).jsonp({ message: 'you are not authorized' }).end()
   }
+}
 
-  return callAuthService('/api/me', {
-    headers: {
-      authorization: req.headers.authorization,
-    }
-  })
-    .then(user => {
-      req.user = user
-      return next()
-    })
-    .catch(() => {
-      return res.status(401).end()
-    })
+function onlyEditor (req, res) {
+  if (!(req.user || req.user.isEditor)) {
+    return res.status(401).jsonp({ message: 'you are not authorized' }).end()
+  }
+}
+
+module.exports = {
+  onlyAuthenticated,
+  onlyEditor
 }
