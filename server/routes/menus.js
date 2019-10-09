@@ -1,6 +1,6 @@
-module.exports = function(app) {
-  const populateUser = require('../middleware/populate-user');
-  const {onlyEditor} = require('../middleware/auth-check');
+module.exports = function (app) {
+  const populateUser = require('../middleware/populate-user')
+  const { onlyEditor } = require('../middleware/auth-check')
 
   const {
     getMenuByName,
@@ -9,8 +9,7 @@ module.exports = function(app) {
     getMenu,
     updateMenu,
     removeMenu,
-  } = require('../controllers/menus');
-
+  } = require('../controllers/menus')
 
   // menus routes
   app
@@ -18,5 +17,5 @@ module.exports = function(app) {
     .post('/api/menus', populateUser, onlyEditor, createMenu)
     .get('/api/menus/:menuName', getMenuByName, getMenu)
     .put('/api/menus/:menuName', populateUser, onlyEditor, getMenuByName, updateMenu)
-    .delete('/api/menus/:menuName', populateUser, onlyEditor, getMenuByName, removeMenu);
+    .delete('/api/menus/:menuName', populateUser, onlyEditor, getMenuByName, removeMenu)
 }
