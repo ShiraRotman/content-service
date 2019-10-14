@@ -5,7 +5,7 @@ function onlyAuthenticated (req, res) {
 }
 
 function onlyEditor (req, res) {
-  if (!(req.user || req.user.isEditor)) {
+  if (!(req.user && req.user.isEditor)) {
     return res.status(401).jsonp({ message: 'you are not authorized' }).end()
   }
 }
