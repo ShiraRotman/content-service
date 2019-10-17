@@ -5,6 +5,7 @@ module.exports = function (app) {
   const { getCategoryByPath } = require('../controllers/categories')
 
   const {
+    getPostById,
     getPostsList, createPost, getPostByPath, getPost,
     updatePost,
     removePost
@@ -12,7 +13,7 @@ module.exports = function (app) {
 
   // posts routes - from category and from posts directly
   app
-    .get('/api/categories/:categoryPath/posts', getCategoryByPath, getPostsList)
+    .get('/api/categories/:categoryPath/posts', populateUser, getCategoryByPath, getPostsList)
     .post('/api/categories/:categoryPath/posts', populateUser, onlyEditor, getCategoryByPath, createPost)
     .get('/api/categories/:categoryPath/posts/:postPath', getCategoryByPath, getPostByPath, getPost)
     .put('/api/categories/:categoryPath/posts/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
@@ -20,6 +21,7 @@ module.exports = function (app) {
   app
     .get('/api/posts', populateUser, getPostsList)
     .post('/api/posts', populateUser, onlyEditor, createPost)
+    .get('/api/posts/:postId', populateUser, onlyEditor, getPostById, getPost)
     .get('/api/posts/:categoryPath/:postPath', getCategoryByPath, getPostByPath, getPost)
     .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)

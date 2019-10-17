@@ -59,6 +59,20 @@ function getPostByPath (req, res, next) {
     .catch(() => res.status(404).jsonp({ message: 'post not exists' }).end())
 }
 
+function getPostById (req, res, next) {
+  return Post.findById(req.params.postId)
+    .populate('category', 'name path')
+    .then(post => {
+      if (!post) {
+        return Promise.reject(null)
+      }
+      req.post = post
+      req.category = post.category
+      return next()
+    })
+    .catch(() => res.status(404).jsonp({ message: 'post not exists' }).end())
+}
+
 function getPostsList (req, res) {
   const reqQuery = req.query || {}
   const query = typeof reqQuery.isPublic !== 'undefined' ?
@@ -176,6 +190,7 @@ function removePost (req, res) {
 
 module.exports = {
   getPostByPath,
+  getPostById,
   getPostsList,
   getPost,
   createPost,
