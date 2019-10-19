@@ -18,10 +18,15 @@ module.exports = function (app) {
     .get('/api/categories/:categoryPath/posts/:postPath', getCategoryByPath, getPostByPath, getPost)
     .put('/api/categories/:categoryPath/posts/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/posts/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)
+
   app
     .get('/api/posts', populateUser, getPostsList)
     .post('/api/posts', populateUser, onlyEditor, createPost)
     .get('/api/posts/:postId', populateUser, onlyEditor, getPostById, getPost)
+    .put('/api/posts/:postId', populateUser, onlyEditor, getPostById, updatePost)
+    .delete('/api/posts/:postId', populateUser, onlyEditor, getPostById, removePost)
+
+  app
     .get('/api/posts/:categoryPath/:postPath', getCategoryByPath, getPostByPath, getPost)
     .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)

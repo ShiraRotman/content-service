@@ -80,7 +80,7 @@ function getPostsList (req, res) {
 
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
-  const populateCategories = req.user.isEditor && reqQuery.populate.includes('categories')
+  const populateCategories = req.user && req.user.isEditor && reqQuery.populate.includes('categories')
 
   return getCategoryFromRequest(req)
     .then(categoryId => {
@@ -161,7 +161,7 @@ function updatePost (req, res) {
   return Promise.resolve(body)
     .then(body => {
       // category replaced
-      if (body.category !== req.category.path) {
+      if (body.category && body.category !== req.category.path) {
         return getCategoryIdByPath(body.category).then(id => {
           body.category = id
           return body
@@ -171,7 +171,7 @@ function updatePost (req, res) {
       return body
     })
     .then(body => Object.assign(post, body))
-    .then(post => post.update())
+    .then(post => post.save())
     .then(post => {
       return res.status(200).jsonp(getDisplayPost(post, req.category)).end()
     })
