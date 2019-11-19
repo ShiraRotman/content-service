@@ -17,6 +17,7 @@ const PostSchema = new mongoose.Schema({
     required: true,
   },
   short: String,
+  thumbnail: String,
   content: String,
   tags: [String],
   created: {

@@ -143,6 +143,11 @@ function createPost (req, res) {
     .then(categoryId => categoryId || Promise.reject('category path does not exist'))
     .then(categoryId => {
       body.category = categoryId
+      body.authors = body.authors || []
+
+      if (!body.authors.includes(req.user._id)) {
+        body.authors.push(req.user._id)
+      }
       return (new Post(body)).save()
     })
     .then(post => {
@@ -160,6 +165,11 @@ function updatePost (req, res) {
 
   return Promise.resolve(body)
     .then(body => {
+
+      if (!post.authors.includes(req.user._id)) {
+        post.authors.push(req.user._id)
+      }
+
       // category replaced
       if (body.category && body.category !== req.category.path) {
         return getCategoryIdByPath(body.category).then(id => {
