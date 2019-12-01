@@ -19,7 +19,10 @@ const PostSchema = new mongoose.Schema({
   short: String,
   thumbnail: String,
   content: String,
-  tags: [String],
+  tags: [{
+    type: String,
+    index: true,
+  }],
   created: {
     type: Date,
     default: Date.now,
