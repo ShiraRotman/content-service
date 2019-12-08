@@ -1,9 +1,14 @@
+const shortid = require('shortid')
 const mongoose = require('mongoose')
 
 // define the model schema
 const CategorySchema = new mongoose.Schema({
   name: String,
-  path: String,
+  path: {
+    type: String,
+    default: () => shortid.generate(),
+    required: true,
+  },
   isPublic: Boolean,
   created: {
     type: Date,

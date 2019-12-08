@@ -64,7 +64,7 @@ function updateCategory(req, res) {
 		category.path = body.isPublic;
 	}
 
-	return category.update()
+	return category.save()
 		.then(category => {
 			return res.status(200).jsonp(category).end();
 		})
