@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 
 routes(app);
 
-app.set('port', (process.env.PORT || 8000));
+app.set('port', (process.env.PORT || 9001));
 app.set('ip', (process.env.IP || '0.0.0.0'));
 
 // start the server
