@@ -15,4 +15,5 @@ module.exports.connect = (uri) => {
   require('./post')
   require('./menu')
   require('./comment')
+  require('./configuration')
 }
