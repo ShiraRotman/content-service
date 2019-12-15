@@ -1,14 +1,19 @@
 const mongoose = require('mongoose')
 
+function connect (uri) {
+  return mongoose.connect(uri, { useMongoClient: true })
+    .catch((err) => {
+      console.error(`Mongoose connection error: ${err}`)
+      console.log('try again in 100ms..')
+      return new Promise(resolve => setTimeout(resolve, 100))
+        .then(() => connect(uri))
+    })
+}
+
 module.exports.connect = (uri) => {
-  mongoose.connect(uri, { useMongoClient: true })
+  const promise = connect(uri)
   // plug in the promise library:
   mongoose.Promise = global.Promise
-
-  mongoose.connection.on('error', (err) => {
-    console.error(`Mongoose connection error: ${err}`)
-    process.exit(1)
-  })
 
   // load models
   require('./category')
@@ -16,4 +21,6 @@ module.exports.connect = (uri) => {
   require('./menu')
   require('./comment')
   require('./configuration')
+
+  return promise
 }

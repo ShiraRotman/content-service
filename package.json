@@ -1,6 +1,7 @@
 {
   "name": "greenpress-content-api",
   "version": "1.0.0",
+  "migrationVersion": 1,
   "description": "API for greenpress project",
   "keywords": [],
   "engines": {
@@ -8,7 +9,8 @@
     "node": ">=10.5"
   },
   "scripts": {
-    "start": "node --use_strict index.js"
+    "prestart": "node ./migrator",
+    "start": "node index.js"
   },
   "author": "David Meir-Levy",
   "license": "MIT",
