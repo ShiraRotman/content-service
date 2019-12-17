@@ -15,7 +15,7 @@ module.exports = function (app) {
   app
     .get('/api/categories/:categoryPath/posts', populateUser, getCategoryByPath, getPostsList)
     .post('/api/categories/:categoryPath/posts', populateUser, onlyEditor, getCategoryByPath, createPost)
-    .get('/api/categories/:categoryPath/posts/:postPath', getCategoryByPath, getPostByPath, getPost)
+    .get('/api/categories/:categoryPath/posts/:postPath',populateUser,  getCategoryByPath, getPostByPath, getPost)
     .put('/api/categories/:categoryPath/posts/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/posts/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)
 
@@ -27,7 +27,7 @@ module.exports = function (app) {
     .delete('/api/posts/:postId', populateUser, onlyEditor, getPostById, removePost)
 
   app
-    .get('/api/posts/:categoryPath/:postPath', getCategoryByPath, getPostByPath, getPost)
+    .get('/api/posts/:categoryPath/:postPath', populateUser, getCategoryByPath, getPostByPath, getPost)
     .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)
 

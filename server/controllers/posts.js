@@ -42,10 +42,12 @@ function getDisplayPost (post, category, authorsMap = {}, comments) {
 }
 
 function getPostByPath (req, res, next) {
+  const isEditor = req.user && req.user.isEditor
+
   let query = Post.findOne({ path: req.params.postPath, category: req.category._id })
 
-  if (req.query.target === 'front') {
-    query = query.select('-short')
+  if (req.query.target === 'front' || !isEditor) {
+    query = query.select('-short -editorContentsStates')
   }
 
   return query
@@ -91,7 +93,7 @@ function getPostsList (req, res) {
     })
     .then(query =>
       Post.find(query)
-        .select('-content')
+        .select('-content -editorContentsStates')
         .sort({ created: -1 })
         .populate('category', 'path' + (populateCategories ? ' name' : ''))
         .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
@@ -165,7 +167,6 @@ function updatePost (req, res) {
 
   return Promise.resolve(body)
     .then(body => {
-
       if (!post.authors.includes(req.user._id)) {
         post.authors.push(req.user._id)
       }

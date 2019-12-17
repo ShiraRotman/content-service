@@ -18,7 +18,11 @@ const PostSchema = new mongoose.Schema({
   },
   short: String,
   thumbnail: String,
-  content: String,
+  contents: [String],
+  editorContentsStates: [{
+    type: String,
+    enum: ['html', 'editor', 'view']
+  }],
   tags: [{
     type: String,
     index: true,

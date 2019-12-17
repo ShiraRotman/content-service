@@ -18,25 +18,29 @@ connection
   })
 
 async function start () {
+  console.log('migrator started')
   const { getCurrentMigrationHandler, clearCurrentMigrationHandler } = require('./migration-handler')
   const { initMigrationConfig, getVersionConfig } = require('./migration-config')
   const { runMigrationsForward } = require('./runner')
 
-  const { migrationVersion } = require('../package.json');
+  const { migrationVersion } = require('../package.json')
 
   const config = await getVersionConfig()
   // new app - create initial configs
   if (!config) {
+    console.log('config is missing. creating and exit.')
     return initMigrationConfig(migrationVersion)
   }
   // same version, nothing to do here.
   if (migrationVersion === config.metadata.latestContentMigration) {
+    console.log('project migration version is the same as latest migration. exit migrator.')
     return
   }
 
   const { metadata } = await getCurrentMigrationHandler()
   // another pod / instance / replica is handling the migration
   if (metadata.isMigrationRunning) {
+    console.log('another migrator is running. exist migrator.')
     return
   }
 
@@ -53,6 +57,7 @@ async function start () {
   // check if this current instance is possessing the migration process, if not - close process.
   const { metadata: { isMigrationRunning, handler } } = await getCurrentMigrationHandler()
   if (!(isMigrationRunning && handler === currentInstance)) {
+    console.log('another migrator is handling the migration. exists.')
     return
   }
 
