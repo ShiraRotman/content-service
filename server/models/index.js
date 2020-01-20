@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 function connect (uri) {
-  return mongoose.connect(uri, { useMongoClient: true })
+  return mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
     .catch((err) => {
       console.error(`Mongoose connection error: ${err}`)
       console.log('try again in 100ms..')
