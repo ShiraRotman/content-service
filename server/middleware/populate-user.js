@@ -1,4 +1,4 @@
-const { editorsRoles } = require('../../config')
+const { editorsRoles, adminRole } = require('../../config')
 const callAuthService = require('../../helpers/call-auth-service')
 
 /**
@@ -15,9 +15,8 @@ module.exports = (req, res, next) => {
     }
   }).then(user => {
     req.user = user
-    if (req.user.roles.find(role => editorsRoles.includes(role))) {
-      req.user.isEditor = true
-    }
+    req.user.isEditor = req.user.roles.some(role => editorsRoles.includes(role));
+    req.user.isAdmin = req.user.roles.includes(adminRole);
     return next()
   }).catch(() => {
     return next()

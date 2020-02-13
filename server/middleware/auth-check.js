@@ -2,7 +2,7 @@ function onlyAuthenticated (req, res, next) {
   if (!req.user) {
     return res.status(401).jsonp({ message: 'you are not authorized' }).end()
   }
-  next();
+  next()
 }
 
 function onlyEditor (req, res, next) {
@@ -12,7 +12,15 @@ function onlyEditor (req, res, next) {
   next()
 }
 
+function onlyAdmin (req, res, next) {
+  if (!(req.user && req.user.isAdmin)) {
+    return res.status(401).jsonp({ message: 'you are not authorized' }).end()
+  }
+  next()
+}
+
 module.exports = {
   onlyAuthenticated,
-  onlyEditor
+  onlyEditor,
+  onlyAdmin
 }

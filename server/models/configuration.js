@@ -13,6 +13,7 @@ const Configuration = new mongoose.Schema({
     type: Boolean,
     default: () => true,
   },
+  description: String,
   // the internal configuration object - can be whatever you want.
   metadata: mongoose.SchemaTypes.Mixed,
   created: {
