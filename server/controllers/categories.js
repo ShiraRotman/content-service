@@ -61,7 +61,7 @@ function updateCategory(req, res) {
 		category.path = body.path;
 	}
 	if (typeof body.isPublic !== 'undefined') {
-		category.path = body.isPublic;
+		category.isPublic = body.isPublic;
 	}
 
 	return category.save()
