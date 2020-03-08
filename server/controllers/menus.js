@@ -10,7 +10,7 @@ function populateMenu (menu) {
     .populate(categoryPopulation)
     .populate({
       path: 'links.post',
-      select: 'path category _id name',
+      select: 'path category _id title',
       populate: {
         path: 'category',
         select: 'path _id'
@@ -47,6 +47,12 @@ function getMenu (req, res) {
 
 function createMenu (req, res) {
   const body = req.body || {}
+
+  if (!(body.links && body.links instanceof Array)) {
+    res.status(400).jsonp({ message: 'menu links are missing' }).end()
+    return
+  }
+
   const menu = new Menu({
     name: body.name,
     links: flattenLinks(body.links),
@@ -101,22 +107,31 @@ function saveAndPopulate (menu) {
     })
 }
 
-function flattenLinks (links) {
-  return links.map(l => {
+function flattenLinks (links = []) {
+  let newLinks = []
+
+  links.forEach((l) => {
+    if (!(l && l.kind)) {
+      return
+    }
     let link = { kind: l.kind, _id: l._id }
     switch (l.kind) {
-      case 'category':
-        link.category = l.value || (l.category || {})._id || l.category
-        break
-      case 'post':
-        link.post = l.value || (l.post || {})._id || l.post
-        break
-      case 'http':
-        link.value = l.value
-        break
+    case 'category':
+      link.category = l.value || (l.category || {})._id || l.category
+      break
+    case 'post':
+      link.post = l.value || (l.post || {})._id || l.post
+      break
+    case 'http':
+      link.value = l.value
+      break
+    default:
+      return
     }
-    return link
+
+    newLinks.push(link)
   })
+  return newLinks
 }
 
 module.exports = {

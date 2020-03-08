@@ -80,9 +80,25 @@ function getPostsList (req, res) {
   const query = typeof reqQuery.isPublic !== 'undefined' ?
     { isPublic: reqQuery.isPublic === 'true' } : {}
 
+  const isLean = reqQuery.lean === 'true'
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
   const populateCategories = req.user && req.user.isEditor && reqQuery.populate.includes('categories')
+
+  if (reqQuery.q) {
+    const reg = new RegExp(reqQuery.q, 'i')
+    if (isLean) {
+      query.title = reg
+    } else {
+      query.$or = [
+        { title: reg },
+        { short: reg },
+      ]
+      if (req.q > 10) {
+        query.$or.push({ contents: reg })
+      }
+    }
+  }
 
   return getCategoryFromRequest(req)
     .then(categoryId => {
@@ -93,7 +109,7 @@ function getPostsList (req, res) {
     })
     .then(query =>
       Post.find(query)
-        .select('-content -editorContentsStates')
+        .select(isLean ? 'title category' : '-content -editorContentsStates')
         .sort({ created: -1 })
         .populate('category', 'path' + (populateCategories ? ' name' : ''))
         .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
