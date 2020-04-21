@@ -3,7 +3,7 @@ const Configuration = require('mongoose').model('Configuration')
 function getConfigurationByKey (req, res, next) {
   const query = { key: req.params.configKey }
   let select = 'key metadata'
-  if (req.user.isAdmin) {
+  if (req.user && req.user.isAdmin) {
     select += ' public public description created'
   } else {
     query.public = true
