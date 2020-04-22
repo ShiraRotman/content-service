@@ -47,7 +47,7 @@ function getPostByPath (req, res, next) {
   let query = Post.findOne({ path: req.params.postPath, category: req.category._id })
 
   if (req.query.target === 'front' || !isEditor) {
-    query = query.select('-short -editorContentsStates')
+    query = query.select('-editorContentsStates')
   }
 
   return query
