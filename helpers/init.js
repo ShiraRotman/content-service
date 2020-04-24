@@ -38,7 +38,8 @@ Promise.all([
 			authors: [],
 			title: 'Welcome to your new blog',
 			short: 'This is the first and demo post.<br>I hope you will enjoy this platform',
-			content: `<p>
+			editorContentsStates: ['editor'],
+			contents: [`<p>
 	This is an example post for greenpress platform.<br>
 	You can change it as you like, but this is a reference for you to create many more blog posts in the near future.
 </p><p>
@@ -52,7 +53,7 @@ Content service is responsible for menus, posts, categories (and comments in the
 <br>
 Front Service is responsible for the client frontend and SSR, using Nuxt.js (+vue, vuex, vue-router..).<br>
 Hopefully on the time you read this line, there's already an admin service for you, so you can manage all of the content. :) 
-</p>`,
+</p>`],
 			tags: [],
 		})).save();
 
