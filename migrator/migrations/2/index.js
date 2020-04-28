@@ -26,7 +26,10 @@ function migrate () {
       name: 'greenpress',
       language: 'en',
       direction: 'ltr',
-      description: 'amazing blog platform',
+      logoUrl: '/logo.png',
+      description: 'Blogs and content sites open-source platform, built for the 21st century, using micro-services and best common technologies.',
+      slogan: 'amazing blog platform',
+      keywords: 'blog, platform, open-source, node, nuxt, vue',
       theme: 'damal',
     }
   })

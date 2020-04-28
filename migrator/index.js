@@ -28,8 +28,8 @@ async function start () {
   const config = await getVersionConfig()
   // new app - create initial configs
   if (!config) {
-    console.log('config is missing. creating and exit.')
-    return initMigrationConfig(migrationVersion)
+    console.log('config is missing. creating first migration config.')
+    await initMigrationConfig(1)
   }
   // same version, nothing to do here.
   if (migrationVersion === config.metadata.latestContentMigration) {

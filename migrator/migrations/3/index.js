@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { appConfiguration } = require('../../../config')
 
 const Post = mongoose.model('Post')
 
