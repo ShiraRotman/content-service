@@ -5,6 +5,30 @@ const categoryPopulation = {
   select: 'path name _id'
 }
 
+const cache = {}
+
+function getCachedMenu (req, res, next) {
+  const menuName = req.params.menuName
+  if (cache[menuName]) {
+    res
+      .status(200)
+      .set('Content-Type', 'application/json')
+      .end(cache[menuName])
+    return
+  }
+  next()
+}
+
+function setCachedMenu (menu) {
+  const menuName = menu.name
+  cache[menuName] = JSON.stringify(menu.toObject ? menu.toObject() : menu)
+  removeCachedMenuLater()
+}
+
+function removeCachedMenuLater (menuName) {
+  setTimeout(() => delete cache[menuName], 1000 * 60 * 60)
+}
+
 function populateMenu (menu) {
   return menu
     .populate(categoryPopulation)
@@ -25,6 +49,7 @@ function getMenuByName (req, res, next) {
         return Promise.reject(null)
       }
       req.menu = menu
+      setTimeout(() => setCachedMenu(menu), 1)
       return next()
     })
     .catch(() => res.status(404).jsonp({ message: 'menu not exists' }).end())
@@ -140,5 +165,6 @@ module.exports = {
   getMenu,
   createMenu,
   updateMenu,
-  removeMenu
+  removeMenu,
+  getCachedMenu
 }

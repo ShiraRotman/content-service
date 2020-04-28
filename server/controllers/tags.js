@@ -9,7 +9,7 @@ setInterval(() => _cachedTags = null, 1000 * 60 * 60)
 
 function sendTags (res) {
   res.status(200)
-  res.set('Content-Type', 'application/json; utf-8')
+  res.set('Content-Type', 'application/json')
   res.end(_cachedTags)
 }
 

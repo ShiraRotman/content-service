@@ -24,7 +24,7 @@ function getCategoriesList (req, res) {
       }
       return res.status(200).jsonp(list).end()
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load categories' }).end())
+    .catch(() => res.status(400).jsonp({ message: 'failed to load categories' }).end())
 }
 
 function getCategory (req, res) {
