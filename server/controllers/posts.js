@@ -1,19 +1,10 @@
-const callAuthService = require('../../helpers/call-auth-service')
-
+const { getUsersList } = require('../../helpers/users')
 const Post = require('mongoose').model('Post')
 const Comment = require('mongoose').model('Comment')
 const Category = require('mongoose').model('Category')
 
 const LIMIT = 30
 const MAX_LIMIT = 300
-
-function getAuthorsList (ids) {
-  return callAuthService('/api/users', {
-    params: {
-      users: ids.join(',')
-    }
-  })
-}
 
 function getCategoryIdByPath (path) {
   return Category
@@ -35,7 +26,7 @@ function getCategoryFromRequest (req) {
 
 function getDisplayPost (post, category, authorsMap = {}, comments) {
   return {
-    ...post.toObject(),
+    ...post.toObject ? post.toObject() : post,
     authors: post.authors.map(a => authorsMap[a]),
     category: {
       name: category.name,
@@ -148,7 +139,7 @@ function getPost (req, res) {
     .then(comments => {
       const authors = comments.map(c => c.author).concat(req.post.authors)
       req.comments = comments
-      return getAuthorsList(authors)
+      return getUsersList(authors)
     })
     .then(authors => {
       const authorsMap = {}
