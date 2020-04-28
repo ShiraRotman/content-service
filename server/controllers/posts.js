@@ -113,7 +113,7 @@ function getPostsList (req, res) {
     })
     .then(() =>
       Post.find(query)
-        .select(isLean ? 'title category' : '-content -editorContentsStates')
+        .select(isLean ? 'title category' : '-contents -editorContentsStates')
         .sort({ created: -1 })
         .populate('category', 'path' + (populateCategories ? ' name' : ''))
         .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
