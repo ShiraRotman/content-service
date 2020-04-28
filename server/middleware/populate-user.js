@@ -15,8 +15,8 @@ module.exports = (req, res, next) => {
     }
   }).then(user => {
     req.user = user
-    req.user.isEditor = req.user.roles.some(role => editorsRoles.includes(role));
-    req.user.isAdmin = req.user.roles.includes(adminRole);
+    req.user.isEditor = req.user.roles.some(role => editorsRoles.includes(role))
+    req.user.isAdmin = req.user.roles.includes(adminRole)
     return next()
   }).catch(() => {
     return next()

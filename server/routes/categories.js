@@ -5,7 +5,7 @@ module.exports = function (app) {
   const {
     getCategoriesList, createCategory, getCategoryByPath, getCategory,
     updateCategory,
-    removeCategory
+    removeCategory,
   } = require('../controllers/categories')
 
   // categories routes

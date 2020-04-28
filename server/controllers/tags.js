@@ -3,7 +3,21 @@ const Post = require('mongoose').model('Post')
 const LIMIT = 30
 const MAX_LIMIT = 300
 
+let _cachedTags
+
+setInterval(() => _cachedTags = null, 1000 * 60 * 60)
+
+function sendTags (res) {
+  res.status(200)
+  res.set('Content-Type', 'application/json; utf-8')
+  res.end(_cachedTags)
+}
+
 function getTagsList (req, res) {
+  if (_cachedTags && _cachedTags.length) {
+    return sendTags(res)
+  }
+
   return Post.aggregate([
     { $project: { tags: 1 } },
     { $unwind: '$tags' },
@@ -15,7 +29,8 @@ function getTagsList (req, res) {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200).jsonp(list).end()
+      _cachedTags = JSON.stringify(list)
+      return sendTags(res)
     })
     .catch(() => res.status(401).jsonp({ message: 'failed to load tags list' }).end())
 }

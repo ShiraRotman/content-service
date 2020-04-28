@@ -24,9 +24,13 @@ function getCategoryIdByPath (path) {
 }
 
 function getCategoryFromRequest (req) {
-  return Promise.resolve(req.category)
-    .then(category => category ? category._id : null)
-    .then(categoryId => categoryId || (req.query.category && getCategoryIdByPath(req.query.category)))
+  if (req.category && req.category._id) {
+    return Promise.resolve(req.category._id)
+  }
+  if (req.query.category) {
+    return getCategoryIdByPath(req.query.category)
+  }
+  return Promise.resolve(null)
 }
 
 function getDisplayPost (post, category, authorsMap = {}, comments) {
@@ -47,7 +51,7 @@ function getPostByPath (req, res, next) {
   let query = Post.findOne({ path: req.params.postPath, category: req.category._id })
 
   if (req.query.target === 'front' || !isEditor) {
-    query = query.select('-editorContentsStates')
+    query = query.select('-editorContentsStates').lean()
   }
 
   return query
@@ -77,8 +81,9 @@ function getPostById (req, res, next) {
 
 function getPostsList (req, res) {
   const reqQuery = req.query || {}
-  const query = typeof reqQuery.isPublic !== 'undefined' ?
-    { isPublic: reqQuery.isPublic === 'true' } : {}
+  const isFrontTargeted = req.query.target === 'front'
+
+  const query = isFrontTargeted ? { isPublic: true } : {}
 
   const isLean = reqQuery.lean === 'true'
   const limit = parseInt(reqQuery.limit) || LIMIT
@@ -105,9 +110,8 @@ function getPostsList (req, res) {
       if (categoryId) {
         query.category = categoryId
       }
-      return query
     })
-    .then(query =>
+    .then(() =>
       Post.find(query)
         .select(isLean ? 'title category' : '-content -editorContentsStates')
         .sort({ created: -1 })
@@ -131,7 +135,10 @@ function getPostsList (req, res) {
         )
         .end()
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load posts list' }).end())
+    .catch((err) => {
+      console.log('ERROR LOADING POSTS', err)
+      res.status(400).jsonp({ message: 'failed to load posts list' }).end()
+    })
 }
 
 function getPost (req, res) {
@@ -139,10 +146,7 @@ function getPost (req, res) {
     .then(comments => comments || [])
     .catch(() => [])
     .then(comments => {
-      const authors = [
-        ...req.post.authors,
-        ...comments.map(c => c.author),
-      ]
+      const authors = comments.map(c => c.author).concat(req.post.authors)
       req.comments = comments
       return getAuthorsList(authors)
     })
@@ -172,7 +176,9 @@ function createPost (req, res) {
       if (!post) {
         return Promise.reject(null)
       }
-      return res.status(200).jsonp({ ...post.toObject(), category: body.category }).end()
+      post = post.toObject()
+      post.category = body.category
+      return res.status(200).jsonp(post).end()
     })
     .catch((err) => res.status(400).jsonp({ message: err || 'post creation failed' }).end())
 }
