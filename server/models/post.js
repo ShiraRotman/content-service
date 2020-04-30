@@ -31,10 +31,15 @@ const PostSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     required: true,
+  },
+  updated: {
+    type: Date,
+    required: true,
   }
 })
 
 PostSchema.pre('save', function (next) {
+  this.updated = new Date()
   if (!this.isModified('path')) return next()
 
   return this.constructor.findOne({ path: this.path, category: this.category })
