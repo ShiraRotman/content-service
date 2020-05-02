@@ -3,7 +3,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const config = require('./config');
-const routes = require('./server/routes');
 
 // connect to the database and load models
 require('./server/models').connect(config.mongoUri);
@@ -15,7 +14,7 @@ app.use(cors());
 // tell the app to parse HTTP body messages
 app.use(bodyParser.json());
 
-routes(app);
+require('./server/routes')(app);
 
 app.set('port', (process.env.PORT || 9001));
 app.set('ip', (process.env.IP || '0.0.0.0'));

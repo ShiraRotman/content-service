@@ -1,7 +1,7 @@
 const Configuration = require('../models/configuration')
 
 function getConfigurationByKey (req, res, next) {
-  return Configuration.getByKey(req.params.configKey, req.user && req.user.isAdmin)
+  Configuration.getByKey(req.params.configKey, req.user && req.user.isAdmin)
     .then(configuration => {
       if (!configuration) {
         return Promise.reject(null)
@@ -9,19 +9,20 @@ function getConfigurationByKey (req, res, next) {
       req.configuration = configuration
       return next()
     })
-    .catch(() => res.status(404).jsonp({ message: 'configuration not exists' }).end())
+    .catch(() => res.status(404).json({ message: 'configuration not exists' }).end())
 }
 
 function getConfigurationsList (req, res) {
-  return Configuration.find({})
+  Configuration.find({})
     .select('key public description created')
+    .lean()
     .then(list => {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200).jsonp(list).end()
+      return res.status(200).json(list).end()
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load configurations list' }).end())
+    .catch(() => res.status(401).json({ message: 'failed to load configurations list' }).end())
 }
 
 function getConfiguration (req, res) {
@@ -30,7 +31,7 @@ function getConfiguration (req, res) {
     res.set('Content-Type', 'application/json')
     res.end(req.configuration)
   } else {
-    res.status(200).jsonp(req.configuration).end()
+    res.status(200).json(req.configuration).end()
   }
 }
 
@@ -50,9 +51,9 @@ function updateConfiguration (req, res) {
       if (!configuration) {
         return Promise.reject(null)
       }
-      return res.status(200).jsonp(configuration).end()
+      return res.status(200).json(configuration).end()
     })
-    .catch(() => res.status(400).jsonp({ message: 'configuration update failed' }).end())
+    .catch(() => res.status(400).json({ message: 'configuration update failed' }).end())
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
-const { callInternalService, SERVICES } = require('./internal-service')
+const { callInternalService, SERVICES: { auth } } = require('./internal-service')
 
 function callAuthService (url, options) {
-  return callInternalService(SERVICES.auth, {
+  return callInternalService(auth, {
     ...options,
     url,
   })

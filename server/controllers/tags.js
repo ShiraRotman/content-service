@@ -24,11 +24,9 @@ function getTagsList (req, res) {
       if (!list) {
         return Promise.reject(null)
       }
-      res.status(200)
-      res.set('Content-Type', 'application/json')
-      res.end(list)
+      res.status(200).set('Content-Type', 'application/json').end(list)
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load tags list' }).end())
+    .catch(() => res.status(401).json({ message: 'failed to load tags list' }).end())
 }
 
 function getPostsByTag (req, res) {
@@ -38,7 +36,7 @@ function getPostsByTag (req, res) {
   const offset = parseInt(reqQuery.offset) || 0
 
   cacheManager.wrap(
-    `${cachePrefix}postByTags:${req.params.tag}.${limit}.${offset}`,
+    `${cachePrefix}postsByTag:${req.params.tag}.${limit}.${offset}`,
     () => Post
       .find({ tags: req.params.tag })
       .select('-content')
@@ -53,9 +51,9 @@ function getPostsByTag (req, res) {
         return Promise.reject(null)
       }
 
-      return res.status(200).jsonp(list).end()
+      return res.status(200).json(list).end()
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load posts list' }).end())
+    .catch(() => res.status(401).json({ message: 'failed to load posts list' }).end())
 }
 
 module.exports = {

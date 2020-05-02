@@ -44,29 +44,29 @@ function getMenuByName (req, res, next) {
     req.menu = menu
     setCachedMenu(menu)
     next()
-  }).catch(() => res.status(404).jsonp({ message: 'menu not exists' }).end())
+  }).catch(() => res.status(404).json({ message: 'menu not exists' }).end())
 }
 
 function getMenusList (req, res) {
-  return Menu.distinct('name')
+  Menu.distinct('name')
     .then(list => {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200).jsonp(list).end()
+      return res.status(200).json(list).end()
     })
-    .catch(() => res.status(400).jsonp({ message: 'failed to load menus list' }).end())
+    .catch(() => res.status(400).json({ message: 'failed to load menus list' }).end())
 }
 
 function getMenu (req, res) {
-  return res.status(200).jsonp(req.menu).end()
+  res.status(200).json(req.menu).end()
 }
 
 function createMenu (req, res) {
   const body = req.body || {}
 
   if (!(body.links && body.links instanceof Array)) {
-    res.status(400).jsonp({ message: 'menu links are missing' }).end()
+    res.status(400).json({ message: 'menu links are missing' }).end()
     return
   }
 
@@ -79,9 +79,9 @@ function createMenu (req, res) {
     if (!menu) {
       return Promise.reject(null)
     }
-    return res.status(200).jsonp(menu).end()
+    return res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).jsonp({ message: 'menu creation failed' }).end())
+    .catch(() => res.status(400).json({ message: 'menu creation failed' }).end())
 }
 
 function updateMenu (req, res) {
@@ -97,18 +97,18 @@ function updateMenu (req, res) {
     if (!menu) {
       return Promise.reject(null)
     }
-    return res.status(200).jsonp(menu).end()
+    return res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).jsonp({ message: 'menu update failed' }).end())
+    .catch(() => res.status(400).json({ message: 'menu update failed' }).end())
 }
 
 function removeMenu (req, res) {
   const menu = req.menu
 
   menu.remove().then(menu => {
-    return res.status(200).jsonp(menu).end()
+    return res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).jsonp({ message: 'menu remove failed' }).end())
+    .catch(() => res.status(400).json({ message: 'menu remove failed' }).end())
 }
 
 function saveAndPopulate (menu) {

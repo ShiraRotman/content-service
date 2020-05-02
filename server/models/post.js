@@ -1,6 +1,5 @@
 const shortid = require('shortid')
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 
 // define the model schema
 const PostSchema = new mongoose.Schema({
@@ -9,7 +8,7 @@ const PostSchema = new mongoose.Schema({
     default: () => shortid.generate(),
     required: true,
   },
-  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   isPublic: Boolean,
   authors: [String],
   title: {
@@ -51,5 +50,15 @@ PostSchema.pre('save', function (next) {
     })
     .catch(next)
 })
+
+PostSchema.statics.search = function search (query, select, { limit, offset, categoriesPopulate }) {
+  return this.find(query)
+    .select(select)
+    .sort({ created: -1 })
+    .populate('category', categoriesPopulate || 'path')
+    .limit(limit)
+    .skip(offset)
+    .lean()
+}
 
 module.exports = mongoose.model('Post', PostSchema)

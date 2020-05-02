@@ -1,5 +1,5 @@
 const { editorsRoles, adminRole } = require('../../config')
-const cacheManage = require('../utils/cache-manager')
+const cacheManager = require('../utils/cache-manager')
 const callAuthService = require('../utils/call-auth-service')
 
 const cachePrefix = 'userByToken:'
@@ -21,11 +21,11 @@ module.exports = (req, res, next) => {
   }
   const authorization = req.headers.authorization
 
-  return cacheManage.wrap(cachePrefix + authorization, () => getUser(authorization))
+  cacheManager.wrap(cachePrefix + authorization, () => getUser(authorization))
     .then(user => {
       req.user = user
       next()
     }).catch(() => {
-      next()
-    })
+    next()
+  })
 }
