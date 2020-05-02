@@ -1,25 +1,17 @@
-const { getUsersList } = require('../../helpers/users')
+const { getUsersList } = require('../utils/users')
 const Post = require('mongoose').model('Post')
-const Comment = require('mongoose').model('Comment')
-const Category = require('mongoose').model('Category')
+const Comment = require('../models/comment')
+const { Category } = require('../models/category')
 
 const LIMIT = 30
 const MAX_LIMIT = 300
-
-function getCategoryIdByPath (path) {
-  return Category
-    .findOne({ path })
-    .select('_id')
-    .lean()
-    .then(cat => cat ? cat._id : null)
-}
 
 function getCategoryFromRequest (req) {
   if (req.category && req.category._id) {
     return Promise.resolve(req.category._id)
   }
   if (req.query.category) {
-    return getCategoryIdByPath(req.query.category)
+    return Category.getCategoryIdByPath(req.query.category)
   }
   return Promise.resolve(null)
 }
@@ -115,7 +107,7 @@ function getPostsList (req, res) {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200)
+      res.status(200)
         .jsonp(
           list.map(post => {
             if (!populateCategories) {
@@ -144,15 +136,14 @@ function getPost (req, res) {
     .then(authors => {
       const authorsMap = {}
       authors.forEach(a => authorsMap[a._id] = a)
-      return res.status(200).jsonp(getDisplayPost(req.post, req.category, authorsMap, req.comments)).end()
+      res.status(200).jsonp(getDisplayPost(req.post, req.category, authorsMap, req.comments)).end()
     })
 }
 
 function createPost (req, res) {
   const body = req.body || {}
 
-  return Promise.resolve(body.category)
-    .then(getCategoryIdByPath)
+  return Category.getCategoryIdByPath(body.category)
     .then(categoryId => categoryId || Promise.reject('category path does not exist'))
     .then(categoryId => {
       body.category = categoryId
@@ -169,7 +160,7 @@ function createPost (req, res) {
       }
       post = post.toObject()
       post.category = body.category
-      return res.status(200).jsonp(post).end()
+      res.status(200).jsonp(post).end()
     })
     .catch((err) => res.status(400).jsonp({ message: err || 'post creation failed' }).end())
 }
@@ -186,7 +177,7 @@ function updatePost (req, res) {
 
       // category replaced
       if (body.category && body.category !== req.category.path) {
-        return getCategoryIdByPath(body.category).then(id => {
+        return Category.getCategoryIdByPath(body.category).then(id => {
           body.category = id
           return body
         })
@@ -197,7 +188,7 @@ function updatePost (req, res) {
     .then(body => Object.assign(post, body))
     .then(post => post.save())
     .then(post => {
-      return res.status(200).jsonp(getDisplayPost(post, req.category)).end()
+      res.status(200).jsonp(getDisplayPost(post, req.category)).end()
     })
     .catch(() => res.status(400).jsonp({ message: 'post update failed' }).end())
 }
@@ -207,7 +198,7 @@ function removePost (req, res) {
 
   return post.remove()
     .then(post => {
-      return res.status(200).jsonp(getDisplayPost(post, req.category)).end()
+      res.status(200).jsonp(getDisplayPost(post, req.category)).end()
     })
     .catch(() => res.status(400).jsonp({ message: 'post remove failed' }).end())
 }

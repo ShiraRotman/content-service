@@ -1,32 +1,27 @@
-const Menu = require('mongoose').model('Menu')
+const Menu = require('../models/menu')
+const cacheManager = require('../utils/cache-manager')
+
+const cachePrefix = 'menu:'
 
 const categoryPopulation = {
   path: 'links.category',
   select: 'path name _id'
 }
 
-const cache = {}
-
 function getCachedMenu (req, res, next) {
   const menuName = req.params.menuName
-  if (cache[menuName]) {
-    res
-      .status(200)
-      .set('Content-Type', 'application/json')
-      .end(cache[menuName])
-    return
-  }
-  next()
+  cacheManager.get(cachePrefix + menuName).then(menu => {
+    if (menu) {
+      res.status(200).set('Content-Type', 'application/json').end(menu)
+    } else {
+      next()
+    }
+  }).catch(() => next())
 }
 
 function setCachedMenu (menu) {
   const menuName = menu.name
-  cache[menuName] = JSON.stringify(menu.toObject ? menu.toObject() : menu)
-  removeCachedMenuLater()
-}
-
-function removeCachedMenuLater (menuName) {
-  setTimeout(() => delete cache[menuName], 1000 * 60 * 60)
+  cacheManager.set(cachePrefix + menuName, JSON.stringify(menu.toObject ? menu.toObject() : menu))
 }
 
 function populateMenu (menu) {
@@ -43,16 +38,14 @@ function populateMenu (menu) {
 }
 
 function getMenuByName (req, res, next) {
-  return populateMenu(Menu.findOne({ name: req.params.menuName }))
-    .then(menu => {
-      if (!menu) {
-        return Promise.reject(null)
-      }
-      req.menu = menu
-      setTimeout(() => setCachedMenu(menu), 1)
-      return next()
-    })
-    .catch(() => res.status(404).jsonp({ message: 'menu not exists' }).end())
+  populateMenu(Menu.findOne({ name: req.params.menuName })).then(menu => {
+    if (!menu) {
+      return Promise.reject(null)
+    }
+    req.menu = menu
+    setTimeout(() => setCachedMenu(menu), 1)
+    next()
+  }).catch(() => res.status(404).jsonp({ message: 'menu not exists' }).end())
 }
 
 function getMenusList (req, res) {
@@ -63,7 +56,7 @@ function getMenusList (req, res) {
       }
       return res.status(200).jsonp(list).end()
     })
-    .catch(() => res.status(401).jsonp({ message: 'failed to load menus list' }).end())
+    .catch(() => res.status(400).jsonp({ message: 'failed to load menus list' }).end())
 }
 
 function getMenu (req, res) {
@@ -83,13 +76,12 @@ function createMenu (req, res) {
     links: flattenLinks(body.links),
   })
 
-  return saveAndPopulate(menu)
-    .then((menu) => {
-      if (!menu) {
-        return Promise.reject(null)
-      }
-      return res.status(200).jsonp(menu).end()
-    })
+  saveAndPopulate(menu).then((menu) => {
+    if (!menu) {
+      return Promise.reject(null)
+    }
+    return res.status(200).jsonp(menu).end()
+  })
     .catch(() => res.status(400).jsonp({ message: 'menu creation failed' }).end())
 }
 
@@ -102,23 +94,21 @@ function updateMenu (req, res) {
   }
   menu.links = flattenLinks(body.links)
 
-  return saveAndPopulate(menu)
-    .then((menu) => {
-      if (!menu) {
-        return Promise.reject(null)
-      }
-      return res.status(200).jsonp(menu).end()
-    })
+  saveAndPopulate(menu).then((menu) => {
+    if (!menu) {
+      return Promise.reject(null)
+    }
+    return res.status(200).jsonp(menu).end()
+  })
     .catch(() => res.status(400).jsonp({ message: 'menu update failed' }).end())
 }
 
 function removeMenu (req, res) {
   const menu = req.menu
 
-  return menu.remove()
-    .then(menu => {
-      return res.status(200).jsonp(menu).end()
-    })
+  menu.remove().then(menu => {
+    return res.status(200).jsonp(menu).end()
+  })
     .catch(() => res.status(400).jsonp({ message: 'menu remove failed' }).end())
 }
 

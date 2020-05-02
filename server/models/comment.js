@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 // define the model schema
 const CommentSchema = new mongoose.Schema({
-  post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
+  post: { type: Schema.Types.ObjectId, ref: 'Post', required: true, index: true },
   author: String,
   content: String,
   created: {

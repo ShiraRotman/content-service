@@ -1,5 +1,8 @@
 const shortid = require('shortid')
 const mongoose = require('mongoose')
+const cacheManager = require('../utils/cache-manager')
+
+const cachePrefix = 'categories:'
 
 // define the model schema
 const CategorySchema = new mongoose.Schema({
@@ -28,5 +31,12 @@ CategorySchema.pre('save', function (next) {
     })
     .catch(next)
 })
+
+CategorySchema.statics.getCategoryIdByPath = function getCategoryIdByPath (path) {
+  return cacheManager.wrap(cachePrefix + 'IdByPath:' + path, () => this.constructor.findOne({ path })
+    .select('_id')
+    .lean()
+    .then(cat => cat ? cat._id : null))
+}
 
 module.exports = mongoose.model('Category', CategorySchema)

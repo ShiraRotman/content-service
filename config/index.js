@@ -10,5 +10,6 @@ module.exports = {
   },
   editorsRoles,
   adminRole,
-  appConfiguration: process.env.APP_CONFIGURATION || 'app-configuration'
+  appConfiguration: process.env.APP_CONFIGURATION || 'app-configuration',
+  redisUrl: process.env.REDIS_URL
 }

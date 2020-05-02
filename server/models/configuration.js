@@ -1,4 +1,7 @@
 const mongoose = require('mongoose')
+const cacheManager = require('../utils/cache-manager')
+
+const cachePrefix = 'configuration:'
 
 // define the model schema
 const Configuration = new mongoose.Schema({
@@ -21,5 +24,22 @@ const Configuration = new mongoose.Schema({
     default: Date.now
   }
 }, { collection: 'configurations' })
+
+Configuration.statics.getByKey = function getByKey (key, isAdmin) {
+  if (isAdmin) {
+    return this.constructor.findOne({ key }).then(config => {
+      if (config.public) {
+        cacheManager.set(cachePrefix + key, JSON.stringify({ key, metadata: config.metadata }))
+      }
+      return config
+    })
+  }
+  return cacheManager.wrap(cachePrefix + key, () => {
+    return this.constructor.findOne({ key, public: true })
+      .select('key metadata')
+      .lean()
+      .then(config => JSON.stringify({ key, metadata: config.metadata }))
+  })
+}
 
 module.exports = mongoose.model('Configuration', Configuration)

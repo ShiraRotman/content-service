@@ -1,15 +1,7 @@
-const Configuration = require('mongoose').model('Configuration')
+const Configuration = require('../models/configuration')
 
 function getConfigurationByKey (req, res, next) {
-  const query = { key: req.params.configKey }
-  let select = 'key metadata'
-  if (req.user && req.user.isAdmin) {
-    select += ' public public description created'
-  } else {
-    query.public = true
-  }
-  return Configuration.findOne(query)
-    .select(select)
+  return Configuration.getByKey(req.params.configKey, req.user && req.user.isAdmin)
     .then(configuration => {
       if (!configuration) {
         return Promise.reject(null)
@@ -33,7 +25,13 @@ function getConfigurationsList (req, res) {
 }
 
 function getConfiguration (req, res) {
-  return res.status(200).jsonp(req.configuration).end()
+  if (typeof req.configuration === 'string') {
+    res.status(200)
+    res.set('Content-Type', 'application/json')
+    res.end(req.configuration)
+  } else {
+    res.status(200).jsonp(req.configuration).end()
+  }
 }
 
 function updateConfiguration (req, res) {
