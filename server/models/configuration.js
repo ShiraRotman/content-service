@@ -27,7 +27,7 @@ const Configuration = new mongoose.Schema({
 
 Configuration.statics.getByKey = function getByKey (key, isAdmin) {
   if (isAdmin) {
-    return this.constructor.findOne({ key }).then(config => {
+    return this.findOne({ key }).then(config => {
       if (config.public) {
         cacheManager.set(cachePrefix + key, JSON.stringify({ key, metadata: config.metadata }))
       }
@@ -35,10 +35,12 @@ Configuration.statics.getByKey = function getByKey (key, isAdmin) {
     })
   }
   return cacheManager.wrap(cachePrefix + key, () => {
-    return this.constructor.findOne({ key, public: true })
+    return this.findOne({ key, public: true })
       .select('key metadata')
       .lean()
-      .then(config => JSON.stringify({ key, metadata: config.metadata }))
+      .then(config => {
+        return JSON.stringify({ key, metadata: config.metadata })
+      })
   })
 }
 

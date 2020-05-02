@@ -33,7 +33,7 @@ CategorySchema.pre('save', function (next) {
 })
 
 CategorySchema.statics.getCategoryIdByPath = function getCategoryIdByPath (path) {
-  return cacheManager.wrap(cachePrefix + 'IdByPath:' + path, () => this.constructor.findOne({ path })
+  return cacheManager.wrap(cachePrefix + 'IdByPath:' + path, () => this.findOne({ path })
     .select('_id')
     .lean()
     .then(cat => cat ? cat._id : null))
