@@ -20,8 +20,7 @@ function getCachedMenu (req, res, next) {
 }
 
 function setCachedMenu (menu) {
-  const menuName = menu.name
-  cacheManager.set(cachePrefix + menuName, JSON.stringify(menu.toObject ? menu.toObject() : menu))
+  cacheManager.set(cachePrefix + menu.name, JSON.stringify(menu.toObject ? menu.toObject() : menu))
 }
 
 function populateMenu (menu) {
@@ -43,7 +42,7 @@ function getMenuByName (req, res, next) {
       return Promise.reject(null)
     }
     req.menu = menu
-    setTimeout(() => setCachedMenu(menu), 1)
+    setCachedMenu(menu)
     next()
   }).catch(() => res.status(404).jsonp({ message: 'menu not exists' }).end())
 }
