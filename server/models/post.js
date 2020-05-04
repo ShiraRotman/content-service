@@ -1,5 +1,8 @@
 const shortid = require('shortid')
 const mongoose = require('mongoose')
+const cacheManager = require('../utils/cache-manager')
+
+const cachePrefix = 'posts:'
 
 // define the model schema
 const PostSchema = new mongoose.Schema({
@@ -51,14 +54,33 @@ PostSchema.pre('save', function (next) {
     .catch(next)
 })
 
-PostSchema.statics.search = function search (query, select, { limit, offset, categoriesPopulate }) {
-  return this.find(query)
+PostSchema.statics.search = function search (query, select, { limit, offset, categoriesFields }, useCache = false) {
+
+  const makeSearch = () => this.find(query)
     .select(select)
     .sort({ created: -1 })
-    .populate('category', categoriesPopulate || 'path')
+    .populate('category', categoriesFields || 'path')
     .limit(limit)
     .skip(offset)
     .lean()
+    .then(list => {
+      if (list && list.length) {
+        if (!categoriesFields) {
+          list = list.map(post => {
+            post.category = post.category.path
+            return post
+          })
+        }
+        return JSON.stringify(list)
+      }
+      return '[]'
+    })
+
+  if (useCache) {
+    return cacheManager.wrap(`${cachePrefix}search:${query}.${select}.${limit}.${offset}.${categoriesFields}`, makeSearch)
+  } else {
+    return makeSearch()
+  }
 }
 
 module.exports = mongoose.model('Post', PostSchema)

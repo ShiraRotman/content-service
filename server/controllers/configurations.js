@@ -27,9 +27,7 @@ function getConfigurationsList (req, res) {
 
 function getConfiguration (req, res) {
   if (typeof req.configuration === 'string') {
-    res.status(200)
-    res.set('Content-Type', 'application/json')
-    res.end(req.configuration)
+    res.status(200).set('Content-Type', 'application/json').end(req.configuration)
   } else {
     res.status(200).json(req.configuration).end()
   }
@@ -46,14 +44,16 @@ function updateConfiguration (req, res) {
     configuration.metadata = body.metadata
   }
 
-  return configuration.save()
+  configuration.save()
     .then((configuration) => {
       if (!configuration) {
         return Promise.reject(null)
       }
-      return res.status(200).json(configuration).end()
+      res.status(200).json(configuration).end()
     })
-    .catch(() => res.status(400).json({ message: 'configuration update failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'configuration update failed' }).end()
+    })
 }
 
 module.exports = {

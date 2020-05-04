@@ -7,6 +7,14 @@ const categoryPopulation = {
   path: 'links.category',
   select: 'path name _id'
 }
+const linkPopulation = {
+  path: 'links.post',
+  select: 'path category _id title',
+  populate: {
+    path: 'category',
+    select: 'path _id'
+  }
+}
 
 function getCachedMenu (req, res, next) {
   const menuName = req.params.menuName
@@ -16,7 +24,9 @@ function getCachedMenu (req, res, next) {
     } else {
       next()
     }
-  }).catch(() => next())
+  }).catch(() => {
+    next()
+  })
 }
 
 function setCachedMenu (menu) {
@@ -24,16 +34,7 @@ function setCachedMenu (menu) {
 }
 
 function populateMenu (menu) {
-  return menu
-    .populate(categoryPopulation)
-    .populate({
-      path: 'links.post',
-      select: 'path category _id title',
-      populate: {
-        path: 'category',
-        select: 'path _id'
-      }
-    })
+  return menu.populate(categoryPopulation).populate(linkPopulation)
 }
 
 function getMenuByName (req, res, next) {
@@ -44,7 +45,9 @@ function getMenuByName (req, res, next) {
     req.menu = menu
     setCachedMenu(menu)
     next()
-  }).catch(() => res.status(404).json({ message: 'menu not exists' }).end())
+  }).catch(() => {
+    res.status(404).json({ message: 'menu not exists' }).end()
+  })
 }
 
 function getMenusList (req, res) {
@@ -53,9 +56,11 @@ function getMenusList (req, res) {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200).json(list).end()
+      res.status(200).json(list).end()
     })
-    .catch(() => res.status(400).json({ message: 'failed to load menus list' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'failed to load menus list' }).end()
+    })
 }
 
 function getMenu (req, res) {
@@ -79,9 +84,11 @@ function createMenu (req, res) {
     if (!menu) {
       return Promise.reject(null)
     }
-    return res.status(200).json(menu).end()
+    res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).json({ message: 'menu creation failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'menu creation failed' }).end()
+    })
 }
 
 function updateMenu (req, res) {
@@ -97,18 +104,22 @@ function updateMenu (req, res) {
     if (!menu) {
       return Promise.reject(null)
     }
-    return res.status(200).json(menu).end()
+    res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).json({ message: 'menu update failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'menu update failed' }).end()
+    })
 }
 
 function removeMenu (req, res) {
   const menu = req.menu
 
   menu.remove().then(menu => {
-    return res.status(200).json(menu).end()
+    res.status(200).json(menu).end()
   })
-    .catch(() => res.status(400).json({ message: 'menu remove failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'menu remove failed' }).end()
+    })
 }
 
 function saveAndPopulate (menu) {
@@ -122,30 +133,26 @@ function saveAndPopulate (menu) {
 }
 
 function flattenLinks (links = []) {
-  let newLinks = []
+  return links
+    .filter(link => link && link.kind)
+    .map((link) => {
+      const newLink = { kind: link.kind, _id: link._id }
+      switch (newLink.kind) {
+      case 'category':
+        newLink.category = link.value || (link.category || {})._id || link.category
+        break
+      case 'post':
+        newLink.post = link.value || (link.post || {})._id || link.post
+        break
+      case 'http':
+        newLink.value = link.value
+        break
+      default:
+        return
+      }
 
-  links.forEach((l) => {
-    if (!(l && l.kind)) {
-      return
-    }
-    let link = { kind: l.kind, _id: l._id }
-    switch (l.kind) {
-    case 'category':
-      link.category = l.value || (l.category || {})._id || l.category
-      break
-    case 'post':
-      link.post = l.value || (l.post || {})._id || l.post
-      break
-    case 'http':
-      link.value = l.value
-      break
-    default:
-      return
-    }
-
-    newLinks.push(link)
-  })
-  return newLinks
+      return newLink
+    })
 }
 
 module.exports = {

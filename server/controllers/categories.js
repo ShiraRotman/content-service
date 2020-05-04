@@ -1,4 +1,4 @@
-const Category = require('mongoose').model('Category')
+const Category = require('../models/category')
 
 function getCategoryByPath (req, res, next) {
   Category.findOne({ path: req.params.categoryPath || req.query.category })
@@ -9,7 +9,9 @@ function getCategoryByPath (req, res, next) {
       req.category = category
       return next()
     })
-    .catch(() => res.status(404).json({ message: 'category not exists' }).end())
+    .catch(() => {
+      res.status(404).json({ message: 'category not exists' }).end()
+    })
 }
 
 function getCategoriesList (req, res) {
@@ -22,9 +24,11 @@ function getCategoriesList (req, res) {
       if (!list) {
         return Promise.reject(null)
       }
-      return res.status(200).json(list).end()
+      res.status(200).json(list).end()
     })
-    .catch(() => res.status(400).json({ message: 'failed to load categories' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'failed to load categories' }).end()
+    })
 }
 
 function getCategory (req, res) {
@@ -44,7 +48,7 @@ function createCategory (req, res) {
       if (!category) {
         return Promise.reject(null)
       }
-      return res.status(200).json(category).end()
+      res.status(200).json(category).end()
     })
     .catch(() => res.status(400).json({ message: 'category creation failed' }).end())
 }
@@ -65,9 +69,11 @@ function updateCategory (req, res) {
 
   category.save()
     .then(category => {
-      return res.status(200).json(category).end()
+      res.status(200).json(category).end()
     })
-    .catch(() => res.status(400).json({ message: 'category update failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'category update failed' }).end()
+    })
 }
 
 function removeCategory (req, res) {
@@ -75,9 +81,11 @@ function removeCategory (req, res) {
 
   category.remove()
     .then(category => {
-      return res.status(200).json(category).end()
+      res.status(200).json(category).end()
     })
-    .catch(() => res.status(400).json({ message: 'category remove failed' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'category remove failed' }).end()
+    })
 }
 
 module.exports = {

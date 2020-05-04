@@ -14,6 +14,18 @@ const TAGS_AGGREGATION_QUERY = [
   { $limit: 20 }
 ]
 
+function getTagPosts (tag, limit, offset) {
+  return Post
+    .find({ tags: tag })
+    .select('-content')
+    .sort({ created: -1 })
+    .populate('category', 'path name')
+    .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
+    .skip(offset)
+    .lean()
+    .then(list => list ? JSON.stringify(list) : '[]')
+}
+
 function getTagsList (req, res) {
   cacheManager.wrap(
     cachePrefix + 'all',
@@ -30,30 +42,22 @@ function getTagsList (req, res) {
 }
 
 function getPostsByTag (req, res) {
-  const reqQuery = req.query || {}
+  const reqQuery = { ...req.query || {} }
 
+  const tag = req.params.tag
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
 
   cacheManager.wrap(
-    `${cachePrefix}postsByTag:${req.params.tag}.${limit}.${offset}`,
-    () => Post
-      .find({ tags: req.params.tag })
-      .select('-content')
-      .sort({ created: -1 })
-      .populate('category', 'path name')
-      .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
-      .skip(offset)
-      .lean()
+    `${cachePrefix}postsByTag.strigified:${tag}.${limit}.${offset}`,
+    () => getTagPosts(tag, limit, offset)
   )
     .then(list => {
-      if (!list) {
-        return Promise.reject(null)
-      }
-
-      return res.status(200).json(list).end()
+      res.status(200).set('Content-Type', 'application/json').end(list)
     })
-    .catch(() => res.status(401).json({ message: 'failed to load posts list' }).end())
+    .catch(() => {
+      res.status(400).json({ message: 'failed to load posts list' }).end()
+    })
 }
 
 module.exports = {

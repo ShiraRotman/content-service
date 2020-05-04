@@ -6,12 +6,12 @@ const Category = require('../models/category')
 const LIMIT = 30
 const MAX_LIMIT = 300
 
-function getCategoryFromRequest ({ query, category }) {
-  if (category && category._id) {
-    return Promise.resolve(category._id)
+function getCategoryIdByPathOrId (categoryPath, categoryId) {
+  if (categoryId) {
+    return Promise.resolve(categoryId)
   }
-  if (query.category) {
-    return Category.getCategoryIdByPath(query.category)
+  if (categoryPath) {
+    return Category.getCategoryIdByPath(categoryPath)
   }
   return Promise.resolve(null)
 }
@@ -67,7 +67,7 @@ function getPostById (req, res, next) {
 }
 
 function getPostsList (req, res) {
-  const reqQuery = req.query || {}
+  const reqQuery = { ...req.query || {} }
   const isFrontTargeted = reqQuery.target === 'front'
 
   const query = isFrontTargeted ? { isPublic: true } : {}
@@ -92,7 +92,11 @@ function getPostsList (req, res) {
     }
   }
 
-  getCategoryFromRequest(req)
+  if (req.category || reqQuery.category) {
+    query.category = req.category._id
+  }
+
+  getCategoryIdByPathOrId(req.query.category, req.category && req.category._id)
     .then(categoryId => {
       if (categoryId) {
         query.category = categoryId
@@ -104,23 +108,14 @@ function getPostsList (req, res) {
       {
         limit: limit > MAX_LIMIT ? MAX_LIMIT : limit,
         offset,
-        categoriesPopulate: populateCategories ? 'path name' : 'path',
-      })
+        categoriesFields: populateCategories ? 'path name' : null,
+      }, isFrontTargeted)
     )
-    .then(list => {
-      if (!list) {
+    .then(data => {
+      if (!data) {
         return Promise.reject(null)
       }
-      res.status(200)
-        .json(
-          list.map(post => {
-            if (!populateCategories) {
-              post.category = post.category.path
-            }
-            return post
-          })
-        )
-        .end()
+      res.status(200).set('Content-Type', 'application/json').end(data)
     })
     .catch((err) => {
       console.log('ERROR LOADING POSTS', err)
