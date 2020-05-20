@@ -54,7 +54,25 @@ PostSchema.pre('save', function (next) {
     .catch(next)
 })
 
-PostSchema.statics.search = function search (query, select, { limit, offset, categoriesFields }, useCache = false) {
+PostSchema.statics.search = function search (query, freeTextSearch, select, { limit, offset, categoriesFields }, useCache = false) {
+
+  const stringedSearch = freeTextSearch ? `${freeTextSearch.text}~${freeTextSearch.basic}` : 'NO_TEXT_SEARCH';
+  const stringedQuery = Object.keys(query).map(key => `${key}=${query[key]}`)
+
+  if (freeTextSearch) {
+    const reg = new RegExp(freeTextSearch.text, 'i')
+    if (freeTextSearch.basic) {
+      query.title = reg
+    } else {
+      query.$or = [
+        { title: reg },
+        { short: reg },
+      ]
+      if (freeTextSearch.text > 10) {
+        query.$or.push({ contents: reg })
+      }
+    }
+  }
 
   const makeSearch = () => this.find(query)
     .select(select)
@@ -77,7 +95,7 @@ PostSchema.statics.search = function search (query, select, { limit, offset, cat
     })
 
   if (useCache) {
-    return cacheManager.wrap(`${cachePrefix}search:${query}.${select}.${limit}.${offset}.${categoriesFields}`, makeSearch)
+    return cacheManager.wrap(`${cachePrefix}search:${stringedQuery}.${stringedSearch}.${select}.${limit}.${offset}.${categoriesFields}`, makeSearch)
   } else {
     return makeSearch()
   }

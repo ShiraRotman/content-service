@@ -68,7 +68,7 @@ function getPostById (req, res, next) {
 
 function getPostsList (req, res) {
   const reqQuery = { ...req.query || {} }
-  const isFrontTargeted = reqQuery.target === 'front'
+  const isFrontTargeted = req.query.target === 'front' || !(req.user && req.user.isEditor)
 
   const query = isFrontTargeted ? { isPublic: true } : {}
 
@@ -77,20 +77,10 @@ function getPostsList (req, res) {
   const offset = parseInt(reqQuery.offset) || 0
   const populateCategories = req.user && req.user.isEditor && reqQuery.populate.includes('categories')
 
-  if (reqQuery.q) {
-    const reg = new RegExp(reqQuery.q, 'i')
-    if (isLean) {
-      query.title = reg
-    } else {
-      query.$or = [
-        { title: reg },
-        { short: reg },
-      ]
-      if (req.q > 10) {
-        query.$or.push({ contents: reg })
-      }
-    }
-  }
+  const freeTextSearch = reqQuery.q ? {
+    text: reqQuery.q,
+    basic: isLean
+  } : null;
 
   if (req.category || reqQuery.category) {
     query.category = req.category._id
@@ -104,6 +94,7 @@ function getPostsList (req, res) {
     })
     .then(() => Post.search(
       query,
+      freeTextSearch,
       isLean ? 'title category' : '-contents -editorContentsStates',
       {
         limit: limit > MAX_LIMIT ? MAX_LIMIT : limit,
