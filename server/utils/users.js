@@ -9,8 +9,8 @@ function getUsersFromApi (users) {
 }
 
 module.exports = {
-  getUsersList (ids) {
+  getUsersList (tenant, ids) {
     const users = ids.join(',')
-    return cacheManager.wrap(cachePrefix + users, () => getUsersFromApi(users))
+    return cacheManager.wrap(cachePrefix + tenant + ':' + users, () => getUsersFromApi(users))
   }
 }

@@ -6,18 +6,21 @@ const cachePrefix = 'tags:'
 const LIMIT = 30
 const MAX_LIMIT = 300
 
-const TAGS_AGGREGATION_QUERY = [
-  { $project: { tags: 1 } },
-  { $unwind: '$tags' },
-  { $group: { _id: '$tags', count: { $sum: 1 } } },
-  { $sort: { count: -1 } },
-  { $limit: 20 }
-]
+function getTagsAggregationQuery (tenant) {
+  return [
+    { $match: { tenant } },
+    { $project: { tags: 1 } },
+    { $unwind: '$tags' },
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 20 }
+  ]
+}
 
-function getTagPosts (tag, limit, offset) {
+function getTagPosts (tenant, tag, limit, offset) {
   return Post
-    .find({ tags: tag })
-    .select('-content')
+    .find({ tags: tag, tenant })
+    .select('-content -tenant')
     .sort({ created: -1 })
     .populate('category', 'path name')
     .limit(limit > MAX_LIMIT ? MAX_LIMIT : limit)
@@ -28,35 +31,33 @@ function getTagPosts (tag, limit, offset) {
 
 function getTagsList (req, res) {
   cacheManager.wrap(
-    cachePrefix + 'all',
-    () => Post.aggregate(TAGS_AGGREGATION_QUERY)
-      .then(tags => JSON.stringify(tags))
+    cachePrefix + 'all:' + req.headers.tenant,
+    () => Post.aggregate(getTagsAggregationQuery(req.headers.tenant))
+      .then(tags => JSON.stringify(tags) || '[]')
   )
     .then(list => {
-      if (!list) {
-        return Promise.reject(null)
-      }
       res.status(200).set('Content-Type', 'application/json').end(list)
     })
-    .catch(() => res.status(401).json({ message: 'failed to load tags list' }).end())
+    .catch(() => res.status(500).json({ message: 'failed to load tags list' }).end())
 }
 
 function getPostsByTag (req, res) {
   const reqQuery = { ...req.query || {} }
 
+  const tenant = req.headers.tenant;
   const tag = req.params.tag
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
 
   cacheManager.wrap(
-    `${cachePrefix}postsByTag.strigified:${tag}.${limit}.${offset}`,
-    () => getTagPosts(tag, limit, offset)
+    `${cachePrefix}postsByTag.strigified:${tenant}.${tag}.${limit}.${offset}`,
+    () => getTagPosts(tenant, tag, limit, offset)
   )
     .then(list => {
       res.status(200).set('Content-Type', 'application/json').end(list)
     })
     .catch(() => {
-      res.status(400).json({ message: 'failed to load posts list' }).end()
+      res.status(500).json({ message: 'failed to load posts list' }).end()
     })
 }
 

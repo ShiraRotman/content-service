@@ -6,6 +6,10 @@ const cachePrefix = 'categories:'
 
 // define the model schema
 const CategorySchema = new mongoose.Schema({
+  tenant: {
+    type: String,
+    required: true,
+  },
   name: String,
   path: {
     type: String,
@@ -19,10 +23,14 @@ const CategorySchema = new mongoose.Schema({
   }
 }, { collection: 'categories' })
 
+CategorySchema.index({ tenant: 1, path: 1 }, { unique: true })
+
 CategorySchema.pre('save', function (next) {
   if (!this.isModified('path')) return next()
 
-  return this.constructor.findOne({ path: this.path })
+  return this.constructor.findOne({ path: this.path, tenant: this.tenant })
+    .select('_id')
+    .lean()
     .then(item => {
       if (item) {
         next({ message: 'path already exists' })
@@ -32,8 +40,8 @@ CategorySchema.pre('save', function (next) {
     .catch(next)
 })
 
-CategorySchema.statics.getCategoryIdByPath = function getCategoryIdByPath (path) {
-  return cacheManager.wrap(cachePrefix + 'IdByPath:' + path, () => this.findOne({ path })
+CategorySchema.statics.getCategoryIdByPath = function getCategoryIdByPath (tenant, path) {
+  return cacheManager.wrap(`${cachePrefix}:IdByPath:${tenant}:${path}`, () => this.findOne({ tenant, path })
     .select('_id')
     .lean()
     .then(cat => cat ? cat._id : null))

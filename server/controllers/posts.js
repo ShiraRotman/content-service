@@ -6,12 +6,12 @@ const Category = require('../models/category')
 const LIMIT = 30
 const MAX_LIMIT = 300
 
-function getCategoryIdByPathOrId (categoryPath, categoryId) {
+function getCategoryIdByPathOrId (tenant, categoryPath, categoryId) {
   if (categoryId) {
     return Promise.resolve(categoryId)
   }
   if (categoryPath) {
-    return Category.getCategoryIdByPath(categoryPath)
+    return Category.getCategoryIdByPath(tenant, categoryPath)
   }
   return Promise.resolve(null)
 }
@@ -27,17 +27,18 @@ function getDisplayPost (post, category, authorsMap = {}, comments) {
   })
 }
 
-function getPostQuery (path, category, isLean) {
-  const query = Post.findOne({ path, category })
+function getPostQuery (tenant, path, category, isLean) {
+  const query = Post.findOne({ tenant, path, category })
 
   if (isLean) {
-    return query.select('-editorContentsStates').lean()
+    return query.select('-editorContentsStates -tenant').lean()
   }
   return query
 }
 
 function getPostByPath (req, res, next) {
   getPostQuery(
+    req.headers.tenant,
     req.params.postPath,
     req.category._id,
     req.query.target === 'front' || !(req.user && req.user.isEditor)
@@ -53,7 +54,7 @@ function getPostByPath (req, res, next) {
 }
 
 function getPostById (req, res, next) {
-  Post.findById(req.params.postId)
+  Post.findOne({ _id: req.params.postId, tenant: req.headers.tenant })
     .populate('category', 'name path')
     .then(post => {
       if (!post) {
@@ -72,6 +73,8 @@ function getPostsList (req, res) {
 
   const query = isFrontTargeted ? { isPublic: true } : {}
 
+  query.tenant = req.headers.tenant
+
   const isLean = reqQuery.lean === 'true'
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
@@ -80,13 +83,13 @@ function getPostsList (req, res) {
   const freeTextSearch = reqQuery.q ? {
     text: reqQuery.q,
     basic: isLean
-  } : null;
+  } : null
 
   if (req.category || reqQuery.category) {
     query.category = req.category._id
   }
 
-  getCategoryIdByPathOrId(req.query.category, req.category && req.category._id)
+  getCategoryIdByPathOrId(req.headers.tenant, req.query.category, req.category && req.category._id)
     .then(categoryId => {
       if (categoryId) {
         query.category = categoryId
@@ -115,12 +118,12 @@ function getPostsList (req, res) {
 }
 
 function getPost (req, res) {
-  Comment.find({ post: req.post._id }).lean()
+  Comment.find({ post: req.post._id, tenant: req.headers.tenant }).lean()
     .then(comments => comments || [], () => [])
     .then(comments => {
       const authors = comments.map(c => c.author).concat(req.post.authors)
       req.comments = comments
-      return getUsersList(authors)
+      return getUsersList(req.headers.tenant, authors)
     })
     .then(authors => {
       res.status(200)
@@ -137,7 +140,7 @@ function getPost (req, res) {
 function createPost (req, res) {
   const body = req.body || {}
 
-  Category.getCategoryIdByPath(body.category)
+  Category.getCategoryIdByPath(req.headers.tenant, body.category)
     .then(categoryId => categoryId || Promise.reject('category path does not exist'))
     .then(categoryId => {
       body.category = categoryId
@@ -163,24 +166,27 @@ function updatePost (req, res) {
   const body = req.body || {}
   const post = req.post
 
+  if (!post.authors.includes(req.user._id)) {
+    post.authors.push(req.user._id)
+  }
   Promise.resolve(body)
     .then(body => {
-      if (!post.authors.includes(req.user._id)) {
-        post.authors.push(req.user._id)
-      }
-
       // category replaced
       if (body.category && body.category !== req.category.path) {
-        return Category.getCategoryIdByPath(body.category).then(id => {
-          body.category = id
+        return Category.getCategoryIdByPath(req.headers.tenant, body.category).then(_id => {
+          body.category = _id
+          req.category = {
+            _id,
+            tenant: req.headers.tenant,
+            path: body.category
+          };
           return body
         })
       }
       delete body.category
       return body
     })
-    .then(body => Object.assign(post, body))
-    .then(post => post.save())
+    .then(body => Object.assign(post, body).save())
     .then(post => {
       res.status(200).json(getDisplayPost(post.toObject(), req.category)).end()
     })

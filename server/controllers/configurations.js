@@ -1,7 +1,7 @@
 const Configuration = require('../models/configuration')
 
 function getConfigurationByKey (req, res, next) {
-  Configuration.getByKey(req.params.configKey, req.user && req.user.isAdmin)
+  Configuration.getByKey(req.headers.tenant, req.params.configKey, req.user && req.user.isAdmin)
     .then(configuration => {
       if (!configuration) {
         return Promise.reject(null)
@@ -13,14 +13,11 @@ function getConfigurationByKey (req, res, next) {
 }
 
 function getConfigurationsList (req, res) {
-  Configuration.find({})
+  Configuration.find({ tenant: req.headers.tenant })
     .select('key public description created')
     .lean()
     .then(list => {
-      if (!list) {
-        return Promise.reject(null)
-      }
-      return res.status(200).json(list).end()
+      return res.status(200).json(list || []).end()
     })
     .catch(() => res.status(401).json({ message: 'failed to load configurations list' }).end())
 }
@@ -45,10 +42,7 @@ function updateConfiguration (req, res) {
   }
 
   configuration.save()
-    .then((configuration) => {
-      if (!configuration) {
-        return Promise.reject(null)
-      }
+    .then(() => {
       res.status(200).json(configuration).end()
     })
     .catch(() => {

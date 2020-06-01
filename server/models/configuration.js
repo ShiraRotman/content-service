@@ -5,11 +5,14 @@ const cachePrefix = 'configuration:'
 
 // define the model schema
 const Configuration = new mongoose.Schema({
+  tenant: {
+    type: String,
+    required: true,
+  },
   // configuration name
   key: {
     type: String,
     required: true,
-    unique: true,
   },
   // is public to see - like site configuration, or not public, like services versions..
   public: {
@@ -25,21 +28,23 @@ const Configuration = new mongoose.Schema({
   }
 }, { collection: 'configurations' })
 
-Configuration.statics.getByKey = function getByKey (key, isAdmin) {
+Configuration.index({ tenant: 1, key: 1 }, { unique: true })
+
+Configuration.statics.getByKey = function getByKey (tenant, key, isAdmin) {
   if (isAdmin) {
-    return this.findOne({ key }).then(config => {
+    return this.findOne({ key, tenant }).then(config => {
       if (config.public) {
-        cacheManager.set(cachePrefix + key, JSON.stringify({ key, metadata: config.metadata }))
+        cacheManager.set(cachePrefix + tenant + ':' + key, JSON.stringify({ tenant, key, metadata: config.metadata }))
       }
       return config
     })
   }
-  return cacheManager.wrap(cachePrefix + key, () => {
+  return cacheManager.wrap(cachePrefix + tenant + ':' + key, () => {
     return this.findOne({ key, public: true })
-      .select('key metadata')
+      .select('tenant key metadata')
       .lean()
       .then(config => {
-        return JSON.stringify({ key, metadata: config.metadata })
+        return JSON.stringify({ tenant, key, metadata: config.metadata })
       })
   })
 }

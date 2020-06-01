@@ -2,9 +2,13 @@ const mongoose = require('mongoose')
 
 // define the model schema
 const MenuSchema = new mongoose.Schema({
+  tenant: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
-    unique: true,
+    required: true,
   },
   links: [{
     kind: {
@@ -16,5 +20,7 @@ const MenuSchema = new mongoose.Schema({
     value: { text: String, url: String, newWindow: Boolean },
   }],
 })
+
+MenuSchema.index({ tenant: 1, name: 1 }, { unique: true })
 
 module.exports = mongoose.model('Menu', MenuSchema)

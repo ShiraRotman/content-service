@@ -16,9 +16,14 @@ const linkPopulation = {
   }
 }
 
+function getCachedName (tenant, menuName) {
+  return cachePrefix + tenant + ':' + menuName
+}
+
 function getCachedMenu (req, res, next) {
+  const tenant = req.headers.tenant
   const menuName = req.params.menuName
-  cacheManager.get(cachePrefix + menuName).then(menu => {
+  cacheManager.get(getCachedName(tenant, menuName)).then(menu => {
     if (menu) {
       res.status(200).set('Content-Type', 'application/json').end(menu)
     } else {
@@ -30,7 +35,7 @@ function getCachedMenu (req, res, next) {
 }
 
 function setCachedMenu (menu) {
-  cacheManager.set(cachePrefix + menu.name, JSON.stringify(menu.toObject ? menu.toObject() : menu))
+  cacheManager.set(getCachedName(menu.tenant, menu.name), JSON.stringify(menu.toObject ? menu.toObject() : menu))
 }
 
 function populateMenu (menu) {
@@ -51,7 +56,7 @@ function getMenuByName (req, res, next) {
 }
 
 function getMenusList (req, res) {
-  Menu.distinct('name')
+  Menu.distinct('name', { tenant: req.headers.tenant })
     .then(list => {
       if (!list) {
         return Promise.reject(null)
@@ -76,16 +81,18 @@ function createMenu (req, res) {
   }
 
   const menu = new Menu({
+    tenant: req.headers.tenant,
     name: body.name,
     links: flattenLinks(body.links),
   })
 
-  saveAndPopulate(menu).then((menu) => {
-    if (!menu) {
-      return Promise.reject(null)
-    }
-    res.status(200).json(menu).end()
-  })
+  saveAndPopulate(menu)
+    .then((menu) => {
+      if (!menu) {
+        return Promise.reject(null)
+      }
+      res.status(200).json(menu).end()
+    })
     .catch(() => {
       res.status(400).json({ message: 'menu creation failed' }).end()
     })
@@ -100,12 +107,13 @@ function updateMenu (req, res) {
   }
   menu.links = flattenLinks(body.links)
 
-  saveAndPopulate(menu).then((menu) => {
-    if (!menu) {
-      return Promise.reject(null)
-    }
-    res.status(200).json(menu).end()
-  })
+  saveAndPopulate(menu)
+    .then((menu) => {
+      if (!menu) {
+        return Promise.reject(null)
+      }
+      res.status(200).json(menu).end()
+    })
     .catch(() => {
       res.status(400).json({ message: 'menu update failed' }).end()
     })
@@ -114,9 +122,10 @@ function updateMenu (req, res) {
 function removeMenu (req, res) {
   const menu = req.menu
 
-  menu.remove().then(menu => {
-    res.status(200).json(menu).end()
-  })
+  menu.remove()
+    .then(menu => {
+      res.status(200).json(menu).end()
+    })
     .catch(() => {
       res.status(400).json({ message: 'menu remove failed' }).end()
     })
@@ -128,7 +137,7 @@ function saveAndPopulate (menu) {
       if (!menu) {
         return Promise.reject(null)
       }
-      return populateMenu(Menu.findOne({ name: menu.name }))
+      return populateMenu(Menu.findOne({ name: menu.name })).lean()
     })
 }
 

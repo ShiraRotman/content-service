@@ -3,6 +3,11 @@ const Schema = mongoose.Schema
 
 // define the model schema
 const CommentSchema = new mongoose.Schema({
+  tenant: {
+    type: String,
+    required: true,
+    index: true
+  },
   post: { type: Schema.Types.ObjectId, ref: 'Post', required: true, index: true },
   author: String,
   content: String,

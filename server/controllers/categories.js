@@ -1,7 +1,7 @@
 const Category = require('../models/category')
 
 function getCategoryByPath (req, res, next) {
-  Category.findOne({ path: req.params.categoryPath || req.query.category })
+  Category.findOne({ path: req.params.categoryPath || req.query.category, tenant: req.headers.tenant })
     .then(category => {
       if (!category) {
         return Promise.reject(null)
@@ -15,16 +15,16 @@ function getCategoryByPath (req, res, next) {
 }
 
 function getCategoriesList (req, res) {
-  const query = req.query && typeof req.query.isPublic !== 'undefined' ?
-    { isPublic: req.query.isPublic === 'true' } : {}
+  const query = { tenant: req.headers.tenant }
+  if (req.query.target === 'front' || !(req.user && req.user.isEditor)) {
+    query.isPublic = true
+  }
 
   Category.find(query)
+    .select('-tenant')
     .lean()
     .then(list => {
-      if (!list) {
-        return Promise.reject(null)
-      }
-      res.status(200).json(list).end()
+      res.status(200).json(list || []).end()
     })
     .catch(() => {
       res.status(400).json({ message: 'failed to load categories' }).end()
@@ -38,6 +38,7 @@ function getCategory (req, res) {
 function createCategory (req, res) {
   const body = req.body || {}
   const category = new Category({
+    tenant: req.headers.tenant,
     name: body.name,
     path: body.path,
     isPublic: body.isPublic,

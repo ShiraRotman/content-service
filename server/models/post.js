@@ -6,6 +6,10 @@ const cachePrefix = 'posts:'
 
 // define the model schema
 const PostSchema = new mongoose.Schema({
+  tenant: {
+    type: String,
+    required: true,
+  },
   path: {
     type: String,
     default: () => shortid.generate(),
@@ -40,11 +44,15 @@ const PostSchema = new mongoose.Schema({
   }
 })
 
+PostSchema.index({ tenant: 1, path: 1, category: 1 }, { unique: true })
+
 PostSchema.pre('save', function (next) {
   this.updated = new Date()
   if (!this.isModified('path')) return next()
 
-  return this.constructor.findOne({ path: this.path, category: this.category })
+  return this.constructor.findOne({ path: this.path, category: this.category, tenant: this.tenant })
+    .select('_id')
+    .lean()
     .then(item => {
       if (item) {
         next({ message: 'path already exists at category' })
@@ -56,7 +64,7 @@ PostSchema.pre('save', function (next) {
 
 PostSchema.statics.search = function search (query, freeTextSearch, select, { limit, offset, categoriesFields }, useCache = false) {
 
-  const stringedSearch = freeTextSearch ? `${freeTextSearch.text}~${freeTextSearch.basic}` : 'NO_TEXT_SEARCH';
+  const stringedSearch = freeTextSearch ? `${freeTextSearch.text}~${freeTextSearch.basic}` : 'NO_TEXT_SEARCH'
   const stringedQuery = Object.keys(query).map(key => `${key}=${query[key]}`)
 
   if (freeTextSearch) {
