@@ -47,7 +47,7 @@ async function migrate () {
   await Menu.collection.update({ tenant: { $exists: false } }, { $set: { tenant: TENANT } }, { multi: true })
 
   console.log('start tenant migration for categories:')
-  await Category.collection.update({ tenant: { $exists: false } }, { $set: { tenant: TENANT } })
+  await Category.collection.update({ tenant: { $exists: false } }, { $set: { tenant: TENANT } }, { multi: true })
 
   console.log('Done!\n' +
     'Do not forget to migrate the users separately.\n' +
