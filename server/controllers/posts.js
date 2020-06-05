@@ -144,6 +144,7 @@ function createPost (req, res) {
     .then(categoryId => categoryId || Promise.reject('category path does not exist'))
     .then(categoryId => {
       body.category = categoryId
+      body.tenant = req.headers.tenant
       body.authors = body.authors || []
 
       if (!body.authors.includes(req.user._id)) {
