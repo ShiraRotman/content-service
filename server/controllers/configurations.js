@@ -38,7 +38,7 @@ function updateConfiguration (req, res) {
     configuration.description = body.description
   }
   if (body.metadata) {
-    configuration.metadata = body.metadata
+    Object.assign(configuration.metadata, body.metadata)
   }
 
   configuration.save()
