@@ -74,6 +74,7 @@ function getMenu (req, res) {
 
 function createMenu (req, res) {
   const body = req.body || {}
+  body.tenant = req.headers.tenant
 
   if (!(body.links && body.links instanceof Array)) {
     res.status(400).json({ message: 'menu links are missing' }).end()

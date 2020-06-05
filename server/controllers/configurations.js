@@ -32,6 +32,7 @@ function getConfiguration (req, res) {
 
 function updateConfiguration (req, res) {
   const body = req.body || {}
+  delete body.tenant
   const configuration = req.configuration
 
   if (body.description) {

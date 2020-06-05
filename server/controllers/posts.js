@@ -165,6 +165,7 @@ function createPost (req, res) {
 
 function updatePost (req, res) {
   const body = req.body || {}
+  delete body.tenant;
   const post = req.post
 
   if (!post.authors.includes(req.user._id)) {
