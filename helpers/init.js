@@ -10,6 +10,7 @@ const Menu = mongoose.model('Menu');
 const Post = mongoose.model('Post');
 
 const category = new Category({
+	tenant: '0',
 	name: 'Test Category',
 	path: 'test-cat',
 	isPublic: true,
@@ -17,6 +18,7 @@ const category = new Category({
 
 
 const cat2 = new Category({
+	tenant: '0',
 	name: 'Second Category',
 	path: 'test2-cat',
 	isPublic: true,
@@ -33,6 +35,7 @@ Promise.all([
 	.then(async ([newCategory, secondCat]) => {
 
 		await (new Post({
+			tenant: '0',
 			category: newCategory._id,
 			isPublic: true,
 			authors: [],
@@ -58,6 +61,7 @@ Hopefully on the time you read this line, there's already an admin service for y
 		})).save();
 
 		return (new Menu({
+			tenant: '0',
 			name: 'main',
 			links: [{
 				kind: 'category',
