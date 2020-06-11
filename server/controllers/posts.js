@@ -112,7 +112,6 @@ function getPostsList (req, res) {
       res.status(200).set('Content-Type', 'application/json').end(data)
     })
     .catch((err) => {
-      console.log('ERROR LOADING POSTS', err)
       res.status(400).json({ message: 'failed to load posts list' }).end()
     })
 }
