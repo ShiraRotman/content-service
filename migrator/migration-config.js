@@ -4,6 +4,7 @@ const { CONFIG_KEY, MIGRATION_KEY } = require('./consts')
 
 function initMigrationConfig (migrationVersion) {
   const versionConfig = new Configuration({
+    tenant: '0',
     key: CONFIG_KEY,
     public: false,
     metadata: {
@@ -12,6 +13,7 @@ function initMigrationConfig (migrationVersion) {
     }
   })
   const migrationConfig = new Configuration({
+    tenant: '0',
     key: MIGRATION_KEY,
     public: false,
     metadata: {
