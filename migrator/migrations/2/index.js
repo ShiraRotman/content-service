@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { appConfiguration } = require('../../../config')
+const TENANT = process.env.TENANT || '0'
 
 const Configuration = mongoose.model('Configuration')
 
@@ -20,6 +21,7 @@ async function check () {
  */
 function migrate () {
   const row = new Configuration({
+    tenant: TENANT,
     key: appConfiguration,
     public: true,
     metadata: {
