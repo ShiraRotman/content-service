@@ -1,4 +1,4 @@
-# Content service for greenpress
+# Greenpress Content service
 
 A content service for greenpress platform 
 
@@ -6,12 +6,18 @@ A content service for greenpress platform
 - manage menus
 - manage categories
 - manage posts
+- manage comments
+- manage website configurations
+- multi tenancy
+- search posts
+- post tags 
+- auto-migrations for updates
 
 ## Dependencies
 - Node.js
 - npm OR yarn
 - MongoDB
-- Authentication service
+- @greenpress/auth service
 
 ## Install
 ```sh
@@ -22,8 +28,4 @@ $ npm install
 ```sh
 $ npm start
 ```
-
-## Future development
-- populate author of post.
-- tags resource api: list of tags, posts by tags.
 
