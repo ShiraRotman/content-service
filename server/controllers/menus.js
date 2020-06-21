@@ -43,7 +43,7 @@ function populateMenu (menu) {
 }
 
 function getMenuByName (req, res, next) {
-  populateMenu(Menu.findOne({ name: req.params.menuName })).then(menu => {
+  populateMenu(Menu.findOne({ name: req.params.menuName, tenant: req.headers.tenant })).then(menu => {
     if (!menu) {
       return Promise.reject(null)
     }
