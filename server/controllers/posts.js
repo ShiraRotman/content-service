@@ -1,4 +1,4 @@
-const { getUsersList } = require('../utils/users')
+const { getUsersMap } = require('../utils/users')
 const Post = require('../models/post')
 const Comment = require('../models/comment')
 const Category = require('../models/category')
@@ -17,8 +17,9 @@ function getCategoryIdByPathOrId (tenant, categoryPath, categoryId) {
 }
 
 function getDisplayPost (post, category, authorsMap = {}, comments) {
+  const authors = post.authors.map(id => authorsMap[id]).filter(Boolean);
   return Object.assign(post, {
-    authors: post.authors.map(a => authorsMap[a]).filter(Boolean),
+    authors,
     category: {
       name: category.name,
       path: category.path
@@ -122,15 +123,15 @@ function getPost (req, res) {
     .then(comments => {
       const authors = comments.map(c => c.author).concat(req.post.authors)
       req.comments = comments
-      return getUsersList(req.headers.tenant, authors)
+      return getUsersMap(req.headers.tenant, authors)
     })
-    .then(authors => {
+    .then(authorsMap => {
       res.status(200)
         .json(
           getDisplayPost(
             req.post.toObject ? req.post.toObject() : req.post,
             req.category,
-            authors.reduce((authorsMap, author) => authorsMap[author._id] = author, {}),
+            authorsMap,
             req.comments)
         ).end()
     })
