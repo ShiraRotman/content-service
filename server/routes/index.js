@@ -1,9 +1,7 @@
-function routes(app) {
-	require('./configurations')(app);
-	require('./categories')(app);
-	require('./posts')(app);
-	require('./menus')(app);
-	require('./tags')(app);
-}
+const app = require('@greenpress/api-kit').app()
 
-module.exports = routes;
+require('./configurations')(app);
+require('./categories')(app);
+require('./posts')(app);
+require('./menus')(app);
+require('./tags')(app);

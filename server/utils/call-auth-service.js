@@ -1,7 +1,7 @@
-const { callInternalService, SERVICES: { auth } } = require('./internal-service')
+const authService = require('@greenpress/api-kit/internal-service').service('AUTH')
 
 function callAuthService (url, options) {
-  return callInternalService(auth, {
+  return authService({
     ...options,
     url,
   })
