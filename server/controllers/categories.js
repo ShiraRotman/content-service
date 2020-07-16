@@ -1,7 +1,9 @@
 const Category = require('../models/category')
 
 function getCategoryByPath (req, res, next) {
-  Category.findOne({ path: req.params.categoryPath || req.query.category, tenant: req.headers.tenant })
+  Category.findOne(
+    { path: req.params.categoryPath || req.query.category, tenant: req.headers.tenant },
+    req.categorySelect, { lean: req.leanCategory })
     .then(category => {
       if (!category) {
         return Promise.reject(null)
@@ -12,6 +14,12 @@ function getCategoryByPath (req, res, next) {
     .catch(() => {
       res.status(404).json({ message: 'category not exists' }).end()
     })
+}
+
+function getCategoryMetadataByPath (req, res, next) {
+  req.categorySelect = 'name path _id'
+  req.leanCategory = true
+  return getCategoryByPath(req, res, next)
 }
 
 function getCategoriesList (req, res) {
@@ -40,6 +48,7 @@ function createCategory (req, res) {
   const category = new Category({
     tenant: req.headers.tenant,
     name: body.name,
+    content: body.content,
     path: body.path,
     isPublic: body.isPublic,
   })
@@ -60,6 +69,9 @@ function updateCategory (req, res) {
 
   if (body.name) {
     category.name = body.name
+  }
+  if (body.content) {
+    category.content = body.content
   }
   if (body.path) {
     category.path = body.path
@@ -91,6 +103,7 @@ function removeCategory (req, res) {
 
 module.exports = {
   getCategoryByPath,
+  getCategoryMetadataByPath,
   getCategoriesList,
   getCategory,
   createCategory,

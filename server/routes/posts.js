@@ -2,7 +2,7 @@ module.exports = function (app) {
   const populateUser = require('../middleware/populate-user')
   const { onlyEditor } = require('../middleware/auth-check')
 
-  const { getCategoryByPath } = require('../controllers/categories')
+  const { getCategoryMetadataByPath } = require('../controllers/categories')
 
   const {
     getPostById,
@@ -13,11 +13,11 @@ module.exports = function (app) {
 
   // posts routes - from category and from posts directly
   app
-    .get('/api/categories/:categoryPath/posts', populateUser, getCategoryByPath, getPostsList)
-    .post('/api/categories/:categoryPath/posts', populateUser, onlyEditor, getCategoryByPath, createPost)
-    .get('/api/categories/:categoryPath/posts/:postPath',populateUser,  getCategoryByPath, getPostByPath, getPost)
-    .put('/api/categories/:categoryPath/posts/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
-    .delete('/api/categories/:categoryPath/posts/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)
+    .get('/api/categories/:categoryPath/posts', populateUser, getCategoryMetadataByPath, getPostsList)
+    .post('/api/categories/:categoryPath/posts', populateUser, onlyEditor, getCategoryMetadataByPath, createPost)
+    .get('/api/categories/:categoryPath/posts/:postPath',populateUser,  getCategoryMetadataByPath, getPostByPath, getPost)
+    .put('/api/categories/:categoryPath/posts/:postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, updatePost)
+    .delete('/api/categories/:categoryPath/posts/postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, removePost)
 
   app
     .get('/api/posts', populateUser, getPostsList)
@@ -27,8 +27,8 @@ module.exports = function (app) {
     .delete('/api/posts/:postId', populateUser, onlyEditor, getPostById, removePost)
 
   app
-    .get('/api/posts/:categoryPath/:postPath', populateUser, getCategoryByPath, getPostByPath, getPost)
-    .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, updatePost)
-    .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryByPath, getPostByPath, removePost)
+    .get('/api/posts/:categoryPath/:postPath', populateUser, getCategoryMetadataByPath, getPostByPath, getPost)
+    .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, updatePost)
+    .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, removePost)
 
 }
