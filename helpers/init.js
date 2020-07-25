@@ -27,7 +27,6 @@ const cat2 = new Category({
 
 console.log('initiate content');
 
-
 Promise.all([
 	category.save(),
 	cat2.save(),
@@ -75,4 +74,9 @@ Hopefully on the time you read this line, there's already an admin service for y
 	.then(() => {
 		console.log('content created successfully');
 		process.exit(0);
+	})
+	.catch((err) => {
+		console.log(err);
+		process.exit(1);
 	});
+
