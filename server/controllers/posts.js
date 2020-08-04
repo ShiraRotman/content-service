@@ -70,7 +70,8 @@ function getPostById (req, res, next) {
 
 function getPostsList (req, res) {
   const reqQuery = { ...req.query || {} }
-  const isFrontTargeted = req.query.target === 'front' || !(req.user && req.user.isEditor)
+  const isFrontTargeted = reqQuery.target === 'front' || !(req.user && req.user.isEditor)
+  const populate = reqQuery.populate || [];
 
   const query = isFrontTargeted ? { isPublic: true } : {}
 
@@ -79,7 +80,7 @@ function getPostsList (req, res) {
   const isLean = reqQuery.lean === 'true'
   const limit = parseInt(reqQuery.limit) || LIMIT
   const offset = parseInt(reqQuery.offset) || 0
-  const populateCategories = req.user && req.user.isEditor && reqQuery.populate.includes('categories')
+  const populateCategories = populate.includes('category')
 
   const freeTextSearch = reqQuery.q ? {
     text: reqQuery.q,
@@ -90,7 +91,7 @@ function getPostsList (req, res) {
     query.category = req.category._id
   }
 
-  getCategoryIdByPathOrId(req.headers.tenant, req.query.category, req.category && req.category._id)
+  getCategoryIdByPathOrId(req.headers.tenant, reqQuery.category, req.category && req.category._id)
     .then(categoryId => {
       if (categoryId) {
         query.category = categoryId
