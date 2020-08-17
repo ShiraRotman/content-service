@@ -6,20 +6,20 @@ const cachePrefix = 'tags:'
 const LIMIT = 30
 const MAX_LIMIT = 300
 
-function getTagsAggregationQuery (tenant) {
+function getTagsAggregationQuery (tenant, isPublic = true) {
   return [
-    { $match: { tenant } },
+    { $match: { tenant, isPublic } },
     { $project: { tags: 1 } },
     { $unwind: '$tags' },
-    { $group: { _id: '$tags', count: { $sum: 1 } } },
+	{ $group: { _id: '$tags', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 20 }
   ]
 }
 
-function getTagPosts (tenant, tag, limit, offset) {
+function getTagPosts (tenant, tag, limit, offset, isPublic = true) {
   return Post
-    .find({ tags: tag, tenant })
+    .find({ tags: tag, tenant, isPublic })
     .select('-content -tenant')
     .sort({ created: -1 })
     .populate('category', 'path name')
