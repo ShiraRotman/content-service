@@ -13,5 +13,5 @@ module.exports = function (app) {
   app
     .get('/api/configurations', populateUser, onlyAdmin, getConfigurationsList) // only admin can get ALL menus names
     .get('/api/configurations/:configKey', populateUser, getConfigurationByKey, getConfiguration)
-    .put('/api/configurations/:configKey', populateUser, getConfigurationByKey, updateConfiguration)
+    .put('/api/configurations/:configKey', populateUser, onlyAdmin, getConfigurationByKey, updateConfiguration)
 }
