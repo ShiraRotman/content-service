@@ -25,11 +25,12 @@ async function start () {
 
   const { migrationVersion } = require('../package.json')
 
-  const config = await getVersionConfig()
+  let config = await getVersionConfig();
   // new app - create initial configs
   if (!config) {
     console.log('config is missing. creating first migration config.')
-    await initMigrationConfig(1)
+    await initMigrationConfig(1);
+	config = await getVersionConfig();
   }
   // same version, nothing to do here.
   if (migrationVersion === config.metadata.latestContentMigration) {

@@ -27,7 +27,8 @@
     "cache-manager": "^3.3.0",
     "cache-manager-redis": "^0.6.0",
     "mongoose": "^5.7.5",
-    "shortid": "^2.2.14"
+    "shortid": "^2.2.14",
+    "validator": "^13.1.1"
   },
   "publishConfig": {
     "access": "public"

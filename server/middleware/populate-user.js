@@ -5,11 +5,13 @@ const callAuthService = require('../utils/call-auth-service')
 const cachePrefix = 'userByToken:'
 
 function getUser (authorization) {
-  return callAuthService('/api/me', { headers: { authorization } }).then(user => {
-    user.isEditor = user.roles.some(role => editorsRoles.includes(role))
-    user.isAdmin = user.roles.includes(adminRole)
-    return user
-  })
+	return new Promise(function(resolve, reject) {
+		callAuthService('/api/me', { headers: { authorization } }).then(user => {
+			user.isEditor = user.roles.some(role => editorsRoles.includes(role));
+			user.isAdmin = user.roles.includes(adminRole);
+			resolve(user);
+		}).catch(err => reject(err));
+	});
 }
 
 /**

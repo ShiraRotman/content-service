@@ -1,6 +1,7 @@
 const shortid = require('shortid')
 const mongoose = require('mongoose')
 const cacheManager = require('../utils/cache-manager')
+const CommentSchema = require('./comment').Schema;
 
 const cachePrefix = 'posts:'
 
@@ -41,7 +42,9 @@ const PostSchema = new mongoose.Schema({
   updated: {
     type: Date,
     default: Date.now,
-  }
+  },
+  //TODO: Implement lazy loading / paging, requires a separate dedicated schema
+  comments: [CommentSchema]
 })
 
 PostSchema.index({ tenant: 1, path: 1, category: 1 }, { unique: true })
