@@ -1,6 +1,6 @@
 {
   "name": "@greenpress/content",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "migrationVersion": 4,
   "description": "Content API for greenpress platform",
   "keywords": [
@@ -26,7 +26,7 @@
     "@greenpress/api-kit": "0.0.1",
     "cache-manager": "^3.3.0",
     "cache-manager-redis": "^0.6.0",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.10.5",
     "shortid": "^2.2.14"
   },
   "publishConfig": {
