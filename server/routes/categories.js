@@ -10,7 +10,7 @@ module.exports = function (app) {
 
   // categories routes
   app
-    .get('/api/categories', getCategoriesList)
+    .get('/api/categories', populateUser, getCategoriesList)
     .post('/api/categories', populateUser, onlyEditor, createCategory)
     .get('/api/categories/:categoryPath', getCategoryByPath, getCategory)
     .put('/api/categories/:categoryPath', populateUser, onlyEditor, getCategoryByPath, updateCategory)
