@@ -30,6 +30,7 @@ async function start () {
   if (!config) {
     console.log('config is missing. creating first migration config.')
     await initMigrationConfig(1)
+	config = await getVersionConfig();
   }
   // same version, nothing to do here.
   if (migrationVersion === config.metadata.latestContentMigration) {
