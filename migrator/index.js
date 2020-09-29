@@ -25,7 +25,7 @@ async function start () {
 
   const { migrationVersion } = require('../package.json')
 
-  const config = await getVersionConfig()
+  let config = await getVersionConfig();
   // new app - create initial configs
   if (!config) {
     console.log('config is missing. creating first migration config.')
