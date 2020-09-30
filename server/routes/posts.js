@@ -5,7 +5,7 @@ module.exports = function (app) {
   const { getCategoryMetadataByPath } = require('../controllers/categories')
 
   const {
-    getPostById,
+    getPostById, buildPostsByAuthorQuery,
     getPostsList, createPost, getPostByPath, getPost,
     updatePost,
     removePost
@@ -31,4 +31,5 @@ module.exports = function (app) {
     .put('/api/posts/:categoryPath/:postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, updatePost)
     .delete('/api/categories/:categoryPath/postPath', populateUser, onlyEditor, getCategoryMetadataByPath, getPostByPath, removePost)
 
+	app.get('/api/author/:authorId/posts', populateUser, buildPostsByAuthorQuery, getPostsList);
 }

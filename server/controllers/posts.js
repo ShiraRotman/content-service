@@ -68,6 +68,11 @@ function getPostById (req, res, next) {
     .catch(() => res.status(404).json({ message: 'post not exists' }).end())
 }
 
+function buildPostsByAuthorQuery(req, res, next) {
+	req.query = { authors: { $all: [req.params.authorId] }, populate: ["category"] };
+	next();
+}
+
 function getPostsList (req, res) {
   const reqQuery = { ...req.query || {} }
   const isFrontTargeted = reqQuery.target === 'front' || !(req.user && req.user.isEditor)
@@ -209,6 +214,7 @@ function removePost (req, res) {
 module.exports = {
   getPostByPath,
   getPostById,
+  buildPostsByAuthorQuery,
   getPostsList,
   getPost,
   createPost,
