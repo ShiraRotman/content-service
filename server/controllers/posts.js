@@ -69,7 +69,7 @@ function getPostById (req, res, next) {
 }
 
 function buildPostsByAuthorQuery(req, res, next) {
-	req.query = { authors: { $all: [req.params.authorId] }, populate: ["category"] };
+	req.query = { authors: req.params.authorId, populate: ["category"] };
 	next();
 }
 
